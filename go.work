@@ -2,5 +2,6 @@ go 1.22.7
 
 use (
 	./downloader-server
+	./message-queue
 	./web-server
 )
