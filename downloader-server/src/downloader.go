@@ -7,7 +7,7 @@ import (
 )
 
 func Download(url string) {
-	outputFileName := "video.mp4"
+	outputFileName := "new.mp4"
 
 	cmd := exec.Command("yt-dlp", "-o", outputFileName, url)
 
