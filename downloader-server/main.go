@@ -1,8 +1,16 @@
 package main
 
-import "downloader-server/src"
+import (
+	"downloader-server/src"
+	"log"
+)
 
 func main() {
-	socket := "localhost:3002"
+	err := src.LoadConfig() // Gets config.json properties.
+	if err != nil {
+		log.Fatalf("Error when loading the config.json: %s\n", err)
+		return
+	}
+	socket := src.DownloaderServerSocket
 	src.InitServer(socket)
 }

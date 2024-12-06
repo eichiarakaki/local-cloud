@@ -4,12 +4,18 @@ import (
 	"bufio"
 	"fmt"
 	"log"
+	"message-queue/src"
 	"net"
 	"os"
 )
 
 func main() {
-	socket := "localhost:3002" // MUST MATCH WITH THE DOWNLOADER SERVER
+	err := src.LoadConfig()
+	if err != nil {
+		log.Fatalf("Unable to load config.json: %s\n", err)
+	}
+	socket := src.DownloaderServerSocket // MUST MATCH WITH THE DOWNLOADER SERVER
+
 	conn, err := net.Dial("tcp", socket)
 	if err != nil {
 		log.Println("Couldn't connect to the downloader server:", err)
