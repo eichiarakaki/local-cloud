@@ -5,12 +5,21 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"strings"
 	"sync"
 )
 
-var MU sync.Mutex
-var ServerStatus bool = false
+var mu sync.Mutex
+
+type Status string
+
+// These variables are going to be send to the message queue
+const (
+	Free       Status = "free\n"
+	Busy       Status = "busy\n"
+	InvalidURL Status = "inurl\n"
+)
+
+var ServerStatus Status = Free
 
 func InitServer(socket string) {
 	ln, err := net.Listen("tcp", socket)
@@ -37,41 +46,47 @@ func InitServer(socket string) {
 }
 
 func handleConnection(conn net.Conn) {
+	conn.Write([]byte(ServerStatus))
+
 	defer conn.Close()
 
 	// Read the data from the client
 	reader := bufio.NewReader(conn)
 
 	for {
-		log.Println("Server's free, waiting for input.")
+		if ServerStatus != Busy && ServerStatus == InvalidURL {
+			ServerStatus = Free
+		}
+
+		switch ServerStatus {
+		case Free:
+			log.Println("Server's free, waiting for the message queue.")
+		case InvalidURL:
+			log.Println("Server's free, input a valid URL.")
+		default:
+			log.Println("Server's working, wait for it.")
+		}
 
 		data, err := reader.ReadString('\n')
 		if err != nil {
 			fmt.Println("Error when reading the data:", err)
 			return
 		}
-		if !ServerStatus { // Processing the data when server isn't busy.
-			url := strings.TrimSpace(data)
-			response := fmt.Sprintf("Downloading %s\n", url)
-			conn.Write([]byte(response))
+
+		if ServerStatus == Free { // Processing the data when server isn't busy.
+			url, err := URLFilter(data) // Filters invalid URLs
+			if err != nil {             // If url is invalid
+				mu.Lock()
+				ServerStatus = InvalidURL
+				mu.Unlock()
+				conn.Write([]byte(ServerStatus))
+				continue
+			}
+			conn.Write([]byte(ServerStatus))
 			StartDownload(url)
 		} else {
 			// Response to the client
-			response := fmt.Sprintf("Server is busy.\n")
-			conn.Write([]byte(response))
+			conn.Write([]byte(ServerStatus))
 		}
 	}
-}
-
-func StartDownload(url string) {
-	MU.Lock()
-	ServerStatus = true // Changes status to busy server
-	MU.Unlock()
-
-	go func() {
-		Download(url)
-		MU.Lock()
-		ServerStatus = false // Changes Status to free server
-		MU.Unlock()
-	}()
 }

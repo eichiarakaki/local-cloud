@@ -3,35 +3,41 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"net"
-  "log"
 	"os"
 )
 
 func main() {
-  socket := "localhost:3002" // MUST MATCH WITH THE DOWNLOADER SERVER
-  conn, err := net.Dial("tcp", socket)
-  if err != nil {
-    log.Println("Couldn't connect to the downloader server:",err)
-  }
-  defer conn.Close()
+	socket := "localhost:3002" // MUST MATCH WITH THE DOWNLOADER SERVER
+	conn, err := net.Dial("tcp", socket)
+	if err != nil {
+		log.Println("Couldn't connect to the downloader server:", err)
+	}
+	defer conn.Close()
 
-  for {
-    scanner := bufio.NewScanner(os.Stdin)
-    fmt.Printf(">>> ")
-    if scanner.Scan() {
-      url := scanner.Text()
-      fmt.Fprintf(conn,"%s\n",url)
+	ch := make(chan string, 1)
 
-      // Reads response
-      response, err := bufio.NewReader(conn).ReadString('\n')
-      if err != nil {
-        log.Println("Error when reading from the server:", err)
-        return
-      }
+	go func() {
+		for {
+			// Reads response
+			response, err := bufio.NewReader(conn).ReadString('\n')
+			if err != nil {
+				log.Println("Error when reading from the server:", err)
+				return
+			}
+			ch <- response
+			log.Println("Response from the server:", <-ch)
+		}
+	}()
 
-      // Prints the response
-      log.Println("Response from the server:", response)
-    }
-  }
+	for {
+		scanner := bufio.NewScanner(os.Stdin)
+
+		if scanner.Scan() {
+			url := scanner.Text()
+			fmt.Fprintf(conn, "%s\n", url)
+		}
+
+	}
 }
