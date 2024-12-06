@@ -3,14 +3,16 @@ package main
 import (
 	"downloader-server/src"
 	"log"
+	shared "shared_mods"
 )
 
 func main() {
-	err := src.LoadConfig() // Gets config.json properties.
+	err := shared.LoadConfig() // Gets config.json properties.
 	if err != nil {
 		log.Fatalf("Error when loading the config.json: %s\n", err)
 		return
 	}
-	socket := src.DownloaderServerSocket
+
+	socket := shared.DownloaderServerSocket
 	src.InitServer(socket)
 }

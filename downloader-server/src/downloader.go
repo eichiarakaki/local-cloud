@@ -1,5 +1,9 @@
 package src
 
+/*
+To-Do
+- Handle unexpected errors and send to the frontend
+*/
 import (
 	"fmt"
 	"log"
@@ -35,7 +39,6 @@ func StartDownload(url string) {
 */
 
 func Download(url string) {
-
 	cmd := exec.Command("yt-dlp", url, "--yes-playlist", "--force-overwrites", "--quiet", "--progress")
 
 	// Executes the command

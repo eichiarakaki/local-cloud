@@ -1,4 +1,4 @@
-package src
+package shared_mods
 
 import (
 	"encoding/json"

@@ -4,17 +4,17 @@ import (
 	"bufio"
 	"fmt"
 	"log"
-	"message-queue/src"
 	"net"
 	"os"
+	shared "shared_mods"
 )
 
 func main() {
-	err := src.LoadConfig()
+	err := shared.LoadConfig()
 	if err != nil {
 		log.Fatalf("Unable to load config.json: %s\n", err)
 	}
-	socket := src.DownloaderServerSocket // MUST MATCH WITH THE DOWNLOADER SERVER
+	socket := shared.DownloaderServerSocket // MUST MATCH WITH THE DOWNLOADER SERVER
 
 	conn, err := net.Dial("tcp", socket)
 	if err != nil {
