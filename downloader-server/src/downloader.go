@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"log"
 	"os/exec"
+	shared "shared_mods"
+	"strings"
 )
 
 func StartDownload(url string) {
@@ -36,10 +38,17 @@ func StartDownload(url string) {
 -q, --quiet Activate quiet mode.  If used with --verbose, print the log to stderr
 --progress Show progress bar, even if in quiet mode
 --write-subs Write subtitle file
+-S, --format-sort SORTORDER Sort the formats by the fields given, see "Sorting Formats" for more details
 */
 
+type VideoData struct {
+	Title string
+	Path  string
+}
+
 func Download(url string) {
-	cmd := exec.Command("yt-dlp", url, "--yes-playlist", "--force-overwrites", "--quiet", "--progress")
+	outputTemplate := shared.VideoStoragePath + "%(title)s.%(ext)s"
+	cmd := exec.Command("yt-dlp", url, "--yes-playlist", "--force-overwrites", "--output", outputTemplate)
 
 	// Executes the command
 	output, err := cmd.CombinedOutput()
@@ -47,6 +56,44 @@ func Download(url string) {
 		log.Fatalf("Error when executing yt-dlp: %v\n", err)
 	}
 
-	fmt.Printf("yt-dlp output: %s\n", output)
-	fmt.Println("Download Completed")
+	videoData, err := filterOutputData(output)
+	if err != nil {
+		log.Fatalf("Couldn't find the file destination: %s\n", err)
+	}
+
+	log.Printf("%s\n", output)
+	log.Printf("Download Completed:%s\nFile name: %s\n", videoData.Path, videoData.Title)
+
+	videoData.PushToBD()
+}
+
+// O(N)
+func filterOutputData(output []byte) (*VideoData, error) {
+	var data VideoData
+	lines := strings.Split(string(output), "\n")
+	for _, line := range lines {
+		if strings.Contains(line, "[Merger] Merging formats into ") {
+			parts := strings.Split(line, "formats into ") // Splits when finds a `[Merger] Merging formats into "`
+			if len(parts) == 2 {
+				// Filtering the full path
+				fullPath := strings.TrimSpace(parts[1])
+				fullPath = fullPath[1 : len(fullPath)-1] // Removes the "" from the output
+
+				// Filtering the full path from the title
+				fileTypes := []string{".mp4", ".mp3", ".webm", ".avi", ".flv", ".mkv"}
+				fileName := strings.Split(fullPath, shared.VideoStoragePath)[1]
+
+				for _, fileType := range fileTypes { // Removes the file extension from the title.
+					if strings.HasSuffix(fileName, fileType) {
+						fileName = strings.Split(fileName, fileType)[0]
+					}
+				}
+
+				data.Path = fullPath
+				data.Title = fileName
+				return &data, nil // removes the "" and returns it
+			}
+		}
+	}
+	return nil, fmt.Errorf("Downloader Server Internal Error.")
 }
