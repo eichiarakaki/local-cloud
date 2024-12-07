@@ -1,9 +1,9 @@
 {
   "video-storage-path": "/home/eichi/projects/local-cloud/videos-storage/",
 
-  "mysql-user-pass": "root:0101",
+  "mysql-conn": "root:0101@tcp(127.0.0.1:3306)",
   "mysql-db-name": "localcloud",
-  "mysql-socket": "127.0.0.1:3306",
+  "mysql-table-name": "localcloud",
 
   "downloader-socket": "localhost:3031",
   "message-socket": "localhost:3032",

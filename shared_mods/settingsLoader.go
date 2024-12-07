@@ -10,9 +10,9 @@ import (
 
 var (
 	VideoStoragePath       string
-	MySQLUserPass          string
+	MySQLConn              string
 	MySQLDBName            string
-	MySQLSocket            string
+	MySQLTableName         string
 	DownloaderServerSocket string
 	MessageQueueSocket     string
 	WebServerSocket        string
@@ -21,9 +21,9 @@ var (
 // Must match with the JSON properties.
 type Config struct {
 	VideoStoragePath       string `json:"video-storage-path"`
-	MySQLUserPass          string `json:"mysql-user-pass"`
+	MySQLConn              string `json:"mysql-conn"`
 	MySQLDBName            string `json:"mysql-db-name"`
-	MySQLSocket            string `json:"mysql-socket"`
+	MySQLTableName         string `json:"mysql-table-name"`
 	DownloaderServerSocket string `json:"downloader-socket"`
 	MessageQueueSocket     string `json:"message-queue-socket"`
 	WebServerSocket        string `json:"webserver-socket"`
@@ -55,9 +55,9 @@ func LoadConfig() error {
 
 	VideoStoragePath = config.VideoStoragePath
 
-	MySQLUserPass = config.MySQLUserPass
+	MySQLConn = config.MySQLConn
 	MySQLDBName = config.MySQLDBName
-	MySQLSocket = config.MySQLSocket
+	MySQLTableName = config.MySQLTableName
 
 	DownloaderServerSocket = config.DownloaderServerSocket
 	MessageQueueSocket = config.MessageQueueSocket

@@ -22,6 +22,7 @@ func StartDownload(url string) {
 		mu.Lock()
 		ServerStatus = Free // Changes Status to free server
 		mu.Unlock()
+
 	}()
 }
 
@@ -48,7 +49,7 @@ type VideoData struct {
 
 func Download(url string) {
 	outputTemplate := shared.VideoStoragePath + "%(title)s.%(ext)s"
-	cmd := exec.Command("yt-dlp", url, "--yes-playlist", "--force-overwrites", "--output", outputTemplate)
+	cmd := exec.Command("yt-dlp", url, "--no-playlist", "--output", outputTemplate)
 
 	// Executes the command
 	output, err := cmd.CombinedOutput()
@@ -56,22 +57,31 @@ func Download(url string) {
 		log.Fatalf("Error when executing yt-dlp: %v\n", err)
 	}
 
-	videoData, err := filterOutputData(output)
+	videoData, isDownloaded, err := dbWrapper(output)
 	if err != nil {
-		log.Fatalf("Couldn't find the file destination: %s\n", err)
+		log.Fatalf("%s\n", err)
 	}
 
 	log.Printf("%s\n", output)
-	log.Printf("Download Completed:%s\nFile name: %s\n", videoData.Path, videoData.Title)
+	log.Printf("Download Completed: %s\nFile name: %s\n", videoData.Path, videoData.Title)
 
-	videoData.PushToBD()
+	if !isDownloaded {
+		videoData.PushToBD()
+	} else {
+		// To-Do: notify the frontend that the file already exists in the database.
+		log.Println("File already exists in the database.")
+	}
 }
 
-// O(N)
-func filterOutputData(output []byte) (*VideoData, error) {
+func dbWrapper(output []byte) (*VideoData, bool, error) {
 	var data VideoData
+
+	// Filters the OUTPUT
 	lines := strings.Split(string(output), "\n")
 	for _, line := range lines {
+		if strings.Contains(line, "has already been downloaded") {
+			return &data, true, nil
+		}
 		if strings.Contains(line, "[Merger] Merging formats into ") {
 			parts := strings.Split(line, "formats into ") // Splits when finds a `[Merger] Merging formats into "`
 			if len(parts) == 2 {
@@ -91,9 +101,9 @@ func filterOutputData(output []byte) (*VideoData, error) {
 
 				data.Path = fullPath
 				data.Title = fileName
-				return &data, nil // removes the "" and returns it
+				return &data, false, nil // removes the "" and returns it
 			}
 		}
 	}
-	return nil, fmt.Errorf("Downloader Server Internal Error.")
+	return nil, false, fmt.Errorf("Error on database's wrapper.")
 }

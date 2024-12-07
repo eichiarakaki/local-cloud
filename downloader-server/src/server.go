@@ -85,7 +85,6 @@ func handleConnection(conn net.Conn) {
 			conn.Write([]byte(ServerStatus))
 			StartDownload(url)
 		} else {
-			// Response to the client
 			conn.Write([]byte(ServerStatus))
 		}
 	}
