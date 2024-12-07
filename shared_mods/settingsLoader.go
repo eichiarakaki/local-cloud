@@ -2,7 +2,6 @@ package shared_mods
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -29,36 +28,32 @@ type Config struct {
 	WebServerSocket        string `json:"webserver-socket"`
 }
 
+// This function should be called only once in each main function of each library that wants to use these global variables.
 func LoadConfig() error {
 	// config.json MUST BE ON THE ROOT DIR.
 	// This file should be on src for this to work propertly.
 	file, err := os.Open("../config.json")
 	if err != nil {
-		errorfmt := fmt.Sprintf("Error while opening the config file: %s", err)
-		return errors.New(errorfmt)
+		return fmt.Errorf("Error while opening the config file: %s", err)
 	}
 	defer file.Close()
 
 	// Reads the file content
 	bytes, err := io.ReadAll(file)
 	if err != nil {
-		errorfmt := fmt.Sprintf("Error when reading the config file: %s", err)
-		return errors.New(errorfmt)
+		return fmt.Errorf("Error when reading the config file: %s", err)
 	}
 
 	// Deserializing the JSON into a 'Config struct'
 	var config Config
 	if err := json.Unmarshal(bytes, &config); err != nil {
-		errorfmt := fmt.Sprintf("Error when deserializing the JSON file: %s", err)
-		return errors.New(errorfmt)
+		return fmt.Errorf("Error when deserializing the JSON file: %s", err)
 	}
 
 	VideoStoragePath = config.VideoStoragePath
-
 	MySQLConn = config.MySQLConn
 	MySQLDBName = config.MySQLDBName
 	MySQLTableName = config.MySQLTableName
-
 	DownloaderServerSocket = config.DownloaderServerSocket
 	MessageQueueSocket = config.MessageQueueSocket
 	WebServerSocket = config.WebServerSocket

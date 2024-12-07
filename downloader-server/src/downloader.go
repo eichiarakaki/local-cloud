@@ -22,7 +22,6 @@ func StartDownload(url string) {
 		mu.Lock()
 		ServerStatus = Free // Changes Status to free server
 		mu.Unlock()
-
 	}()
 }
 
@@ -48,8 +47,7 @@ type VideoData struct {
 }
 
 func Download(url string) {
-	outputTemplate := shared.VideoStoragePath + "%(title)s.%(ext)s"
-	cmd := exec.Command("yt-dlp", url, "--no-playlist", "--output", outputTemplate)
+	cmd := commadBuilder(url)
 
 	// Executes the command
 	output, err := cmd.CombinedOutput()
@@ -62,7 +60,7 @@ func Download(url string) {
 		log.Fatalf("%s\n", err)
 	}
 
-	log.Printf("%s\n", output)
+	// log.Printf("%s\n", output)
 	log.Printf("Download Completed: %s\nFile name: %s\n", videoData.Path, videoData.Title)
 
 	if !isDownloaded {
@@ -71,6 +69,12 @@ func Download(url string) {
 		// To-Do: notify the frontend that the file already exists in the database.
 		log.Println("File already exists in the database.")
 	}
+}
+
+func commadBuilder(url string) *exec.Cmd {
+	// To-Do: give the user options to download playlists, and override files
+	outputTemplate := shared.VideoStoragePath + "%(title)s.%(ext)s"
+	return exec.Command("yt-dlp", url, "--no-playlist", "--output", outputTemplate)
 }
 
 func dbWrapper(output []byte) (*VideoData, bool, error) {

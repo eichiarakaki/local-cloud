@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	shared "shared_mods"
 	"sync"
 )
 
@@ -21,10 +22,12 @@ const (
 
 var ServerStatus Status = Free
 
-func InitServer(socket string) {
+func InitServer() {
+	socket := shared.DownloaderServerSocket
+
 	ln, err := net.Listen("tcp", socket)
 	if err != nil {
-		log.Println("Error when initializing the server.", err)
+		log.Fatalln("Error when initializing the server.", err)
 		return
 	}
 	defer ln.Close()
@@ -32,16 +35,14 @@ func InitServer(socket string) {
 	log.Println("Server listening on", socket)
 
 	for {
-		// Accepts only one connection
 		conn, err := ln.Accept()
 		if err != nil {
-			fmt.Println("Error when connecting:", err)
+			log.Println("Error when connecting:", err)
 			continue
 		}
 
 		// Handling connection
 		go handleConnection(conn)
-
 	}
 }
 

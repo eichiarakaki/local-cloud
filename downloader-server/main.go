@@ -9,10 +9,9 @@ import (
 func main() {
 	err := shared.LoadConfig() // Gets config.json properties.
 	if err != nil {
-		log.Fatalf("Error when loading the config.json: %s\n", err)
+		log.Fatalf("%s\n", err)
 		return
 	}
 
-	socket := shared.DownloaderServerSocket
-	src.InitServer(socket)
+	src.InitServer()
 }
