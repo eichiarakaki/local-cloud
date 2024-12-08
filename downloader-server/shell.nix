@@ -6,7 +6,8 @@
 
 pkgs.mkShell {
   buildInputs = with pkgs; [
-      yt-dlp
+      yt-dlp # youtube downloader
+      ffmpeg # thumbnail extractor
   ];
 
   name = "downloader-server-env";

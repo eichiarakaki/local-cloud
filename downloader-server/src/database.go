@@ -68,8 +68,8 @@ func upload(db *sql.DB, vd *VideoData) error {
 	}
 
 	if count == 0 {
-		insertQuery := fmt.Sprintf("INSERT INTO %s (filepath, filename) VALUES(?, ?)", shared.MySQLTableName)
-		_, err := db.Exec(insertQuery, vd.Path, vd.Title)
+		insertQuery := fmt.Sprintf("INSERT INTO %s (filepath, filename, thumbnail) VALUES(?, ?, ?)", shared.MySQLTableName)
+		_, err := db.Exec(insertQuery, vd.Path, vd.Title, vd.Thumbnail)
 		if err != nil {
 			return fmt.Errorf("Error inserting data: %v", err)
 		}
@@ -80,12 +80,19 @@ func upload(db *sql.DB, vd *VideoData) error {
 	return nil
 }
 
-// This function removes the video if there's an error on the database
+// This function removes the video if there's an error on the database.
 func (vd *VideoData) safeErr(err error) {
 	newErr := os.Remove(vd.Path)
 	if newErr != nil {
-		log.Printf("unable to remove %s, please remove it manually.\n", newErr)
+		log.Printf("unable to remove '%s', please remove it manually.\n", newErr)
 	}
+	log.Printf("'%s' was removed successfully.", vd.Path)
+	newErr = os.Remove(vd.Thumbnail)
+	if newErr != nil {
+		log.Printf("unable to remove '%s', please remove it manually.\n", newErr)
+	}
+	log.Printf("'%s' was removed successfully.", vd.Thumbnail)
+
 	log.Panicln(err)
 }
 
