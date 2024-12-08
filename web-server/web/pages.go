@@ -6,11 +6,8 @@ import (
 )
 
 func HomePage(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := template.ParseFiles("static/html/homepage.html")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	w.Header().Set("Content-Type", "text/html")
+	tmpl := template.Must(template.ParseFiles("static/html/homepage.html"))
 
 	tmpl.Execute(w, nil)
 }

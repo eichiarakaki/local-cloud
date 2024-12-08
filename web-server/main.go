@@ -3,24 +3,29 @@ package main
 import (
 	"log"
 	"net/http"
+	shared "shared_mods"
 	"time"
 
 	"github.com/eichiarakaki/local-cloud/api"
-	"github.com/eichiarakaki/local-cloud/middleware"
 	"github.com/eichiarakaki/local-cloud/web"
 	"github.com/gorilla/mux"
 )
 
 func main() {
-	socket := "localhost:3030"
+	err := shared.LoadConfig()
+	if err != nil {
+		log.Fatalf("%s\n", err)
+	}
+	socket := shared.WebServerSocket
+
 	router := mux.NewRouter()
 	// Adding Web router
 	web.RegisterWebRouter(router)
 	// Adding API router
 	api.RegisterAPIRouter(router)
 
-	// Adding Middleware
-	router.Use(middleware.APIFilter)
+	// Adding Middleware - Better do this with a proxy.
+	// router.Use(middleware.APIFilter)
 
 	server := &http.Server{
 		Handler:      router,

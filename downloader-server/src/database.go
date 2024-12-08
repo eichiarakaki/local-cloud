@@ -80,11 +80,20 @@ func upload(db *sql.DB, vd *VideoData) error {
 	return nil
 }
 
+// This function removes the video if there's an error on the database
+func (vd *VideoData) safeErr(err error) {
+	newErr := os.Remove(vd.Path)
+	if newErr != nil {
+		log.Printf("unable to remove %s, please remove it manually.\n", newErr)
+	}
+	log.Panicln(err)
+}
+
 func (vd *VideoData) PushToBD() {
 	dsn := fmt.Sprintf("%s/%s", shared.MySQLConn, shared.MySQLDBName)
 	db, err := connectDB(dsn)
 	if err != nil {
-		log.Panicln(err)
+		vd.safeErr(err)
 	}
 	defer db.Close()
 
@@ -93,12 +102,12 @@ func (vd *VideoData) PushToBD() {
 
 	err = checkAndCreateTable(db)
 	if err != nil {
-		log.Fatalf("%s\n", err)
+		vd.safeErr(err)
 	}
 
 	err = upload(db, vd)
 	if err != nil {
-		log.Fatalf("%s\n", err)
+		vd.safeErr(err)
 	}
 
 	fmt.Println("Cycle finished.")
