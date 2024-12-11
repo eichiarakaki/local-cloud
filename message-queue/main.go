@@ -12,9 +12,10 @@ import (
 func main() {
 	err := shared.LoadConfig()
 	if err != nil {
-		log.Fatalf("Unable to load config.json: %s\n", err)
+		log.Fatalln(err)
 	}
-	socket := shared.DownloaderServerSocket // MUST MATCH WITH THE DOWNLOADER SERVER
+
+	socket := shared.DownloaderServerSocket
 
 	conn, err := net.Dial("tcp", socket)
 	if err != nil {

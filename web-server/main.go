@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/eichiarakaki/local-cloud/api"
+	"github.com/eichiarakaki/local-cloud/utils"
 	"github.com/eichiarakaki/local-cloud/web"
 	"github.com/gorilla/mux"
 )
@@ -23,6 +24,9 @@ func main() {
 	web.RegisterWebRouter(router)
 	// Adding API router
 	api.RegisterAPIRouter(router)
+
+	// printing all routes
+	utils.PrintRoutes(router)
 
 	// Adding Middleware - Better do this with a proxy.
 	// router.Use(middleware.APIFilter)
