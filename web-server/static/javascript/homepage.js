@@ -2,10 +2,12 @@
 
 const videoContainer = document.getElementById("videos-container");
 
-function videoHTML(filepath, title, created_at) {
-    const encodedTitle = encodeURIComponent(filepath);
-    const thumbnailPath = `/api/videos-storage/${encodedTitle}`
-    return `<div class="video-container">
+function videoHTML(filepath, title, thumbnail, created_at) {
+    const encodedTitle = encodeURIComponent(title);
+    const encodedThumbnail = encodeURIComponent(thumbnail);
+    const thumbnailPath = `/api/videos-storage/${encodedThumbnail}`
+
+    return `<div onclick="openVideo('${encodedTitle}', '${title}', '${filepath}','${created_at}')" class="video-container">
                     <img src=${thumbnailPath} class="video-thumbnail"></img>
                     <div class="video-texts-container">
                         <span class="video-title">${title}</span>
@@ -25,10 +27,9 @@ async function fetchVideos() {
         } 
         // Parse the JSON from the response 
         const data = await response.json();
-        console.log(data);
          // Handle the data from the response 
          data.forEach(element => { 
-            videoContainer.innerHTML += videoHTML(element.filepath, element.filename, element.created_at); 
+            videoContainer.innerHTML += videoHTML(element.filepath, element.filename, element.thumbnial, element.created_at); // thumbnial, not thumnail (i gotta fix this shit)
         }); 
     } catch (error) {
          // Handle errors that occurred during the fetch 
@@ -36,3 +37,11 @@ async function fetchVideos() {
         } 
     } // Call the function to fetch videos 
 fetchVideos();
+
+function openVideo(videoName, videoTitle, embedVideo, createdAt) {
+    const encodedTitle = encodeURIComponent(videoTitle);
+    const encodedCreatedAt = encodeURIComponent(createdAt);
+    const encodedEmbeddedVideo = encodeURIComponent(embedVideo);
+    const videoURL = `/video/${videoName}?title=${encodedTitle}&created_at=${encodedCreatedAt}&embedded_video=${encodedEmbeddedVideo}`;
+    window.location.href = videoURL;
+}

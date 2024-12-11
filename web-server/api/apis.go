@@ -58,8 +58,8 @@ func GetAllVideos(w http.ResponseWriter, r *http.Request) {
 			log.Println("Error decoding video file URL:", err)
 		}
 
-		aVideoData.Path = decodedThumbnail
-		aVideoData.Thumbnail = decodedPath
+		aVideoData.Path = decodedPath
+		aVideoData.Thumbnail = decodedThumbnail
 
 		videosData = append(videosData, aVideoData)
 	}

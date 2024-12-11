@@ -1,63 +1,9 @@
+@import "navbar.css";
+
 :root {
     --navbar_btn: 2px solid #232323;
     --navbar_btn-radious: 30px;
     --videos-container-radious: 10px;
-}
-#navbar {
-    height: 45px;
-    color: inherit;
-    background-color: #202020;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 20px;
-}
-
-#navbar_search-box {
-    all: unset;
-
-    height: 30px;
-    max-width: 350px;
-    min-width: 100px;
-    background-color: #101010;
-    border-color: #151515;
-    border-radius: 30px;
-    padding: 2px 20px;
-    border-width: 2px;
-}
-
-@media only screen and (min-width: 530px) {
-    #navbar_logo {
-        font-size: 20px;
-    }
-    #navbar_search {
-        display: flex;
-        justify-content: center; /* Centra los elementos dentro de este contenedor */
-        width: fit-content;
-    }
-}
-@media only screen and (max-width: 530px) {
-    #navbar_logo {
-        display: none;
-    }
-}
-/* #navbar_search-btn {
-    all: unset;
-    margin-left: 10px;
-    margin-right: 10px;
-    background-color: #101010;
-    border: var(--navbar_btn);
-    border-radius: var(--navbar_btn-radious);
-    padding: 5px 15px;
-} */
-#navbar_upload-btn {
-    all: unset;
-
-    background-color: #101010;
-    border: var(--navbar_btn);
-    border-radius: var(--navbar_btn-radious);
-    padding: 5px 15px;
 }
 
 /* VIDEO CLASSES */
@@ -115,6 +61,7 @@
     display: flex;
     min-height: 100px;
     flex-direction: column;
+    cursor: pointer;
 }
 .video-title {
     /* font-family: 'Courier New', Courier, monospace; */
