@@ -30,3 +30,32 @@
         color: #9a9a9a;
     }
 }
+
+@media only screen and (max-width: 720px) {
+    .video-container {
+        padding: 20px;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+    
+    .embed-video {
+        width: 100%;
+    }
+
+    .video-texts-container {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+
+    }
+    
+    .video-title {
+        font-size: 20px;
+    }
+    .video-created_at{
+        color: #9a9a9a;
+    }
+}
