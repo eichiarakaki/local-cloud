@@ -2,13 +2,16 @@
 
 const videoContainer = document.getElementById("videos-container");
 
-function videoHTML(title) {
-    const encodedTitle = encodeURIComponent(title);
+function videoHTML(filepath, title, created_at) {
+    const encodedTitle = encodeURIComponent(filepath);
     const thumbnailPath = `/api/videos-storage/${encodedTitle}`
     return `<div class="video-container">
-                    <img src=${thumbnailPath} class="thumbnail"></img>
-                    <span class="title">${title}</span>
-                </div>`;
+                    <img src=${thumbnailPath} class="video-thumbnail"></img>
+                    <div class="video-texts-container">
+                        <span class="video-title">${title}</span>
+                        <span class="video-created_at">${created_at}</span>
+                    </div>    
+                    </div>`;
 }
 
 const APIPrefix = "/api";
@@ -25,7 +28,7 @@ async function fetchVideos() {
         console.log(data);
          // Handle the data from the response 
          data.forEach(element => { 
-            videoContainer.innerHTML += videoHTML(element.filepath); 
+            videoContainer.innerHTML += videoHTML(element.filepath, element.filename, element.created_at); 
         }); 
     } catch (error) {
          // Handle errors that occurred during the fetch 

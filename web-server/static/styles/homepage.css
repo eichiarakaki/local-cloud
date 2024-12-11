@@ -1,6 +1,7 @@
 :root {
     --navbar_btn: 2px solid #232323;
     --navbar_btn-radious: 30px;
+    --videos-container-radious: 10px;
 }
 #navbar {
     height: 45px;
@@ -84,7 +85,7 @@
         max-height: 350px;
         max-width: 300px;
 
-        border-radius: 20px;
+        border-radius: var(--videos-container-radious);
         background-color: black;
     }
 }
@@ -97,7 +98,28 @@
         max-height: 350px;
         max-width: 100%;
 
-        border-radius: 20px;
+        border-radius: var(--videos-container-radious);
         background-color: black;
     }
+}
+
+/* Thumbnail */
+.video-thumbnail {
+    width: 100%;
+    border-radius: var(--videos-container-radious);
+    
+}
+.video-texts-container {
+    padding: 5px;
+    text-align: center;
+    display: flex;
+    min-height: 100px;
+    flex-direction: column;
+}
+.video-title {
+    /* font-family: 'Courier New', Courier, monospace; */
+}
+.video-created_at{
+    margin-top: auto;
+    color: #9a9a9a;
 }
