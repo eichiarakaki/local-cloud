@@ -7,13 +7,35 @@ function videoHTML(filepath, title, thumbnail, created_at) {
     const encodedThumbnail = encodeURIComponent(thumbnail);
     const thumbnailPath = `/api/videos-storage/${encodedThumbnail}`
 
-    return `<div onclick="openVideo('${encodedTitle}', '${title}', '${filepath}','${created_at}')" class="video-container">
-                    <img src=${thumbnailPath} class="video-thumbnail"></img>
-                    <div class="video-texts-container">
-                        <span class="video-title">${title}</span>
-                        <span class="video-created_at">${created_at}</span>
-                    </div>    
-                    </div>`;
+    // Creating video container
+    const videoContainer = document.createElement("div");
+    videoContainer.classList.add("video-container");
+    videoContainer.onclick = () => (openVideo(encodedTitle, title, filepath, created_at));
+    
+    // Creating thumbnail
+    const thumbnailElement = document.createElement("img");
+    thumbnailElement.classList.add("video-thumbnail");
+    thumbnailElement.src = thumbnailPath;
+
+    // Video texts container
+    const videoTextsContainer = document.createElement("div");
+    videoTextsContainer.classList.add("video-texts-container");
+
+    // Creating spans
+    const titleSpan = document.createElement("span");
+    const createdTimeSpan = document.createElement("span");
+    titleSpan.classList.add("video-title");
+    createdTimeSpan.classList.add("video-created_at");
+    titleSpan.innerHTML = title;
+    createdTimeSpan.innerHTML = created_at;
+
+    // Assembling
+    videoTextsContainer.appendChild(titleSpan);
+    videoTextsContainer.appendChild(createdTimeSpan);
+    videoContainer.append(thumbnailElement);
+    videoContainer.append(videoTextsContainer);
+
+    return videoContainer;
 }
 
 const APIPrefix = "/api";
@@ -29,7 +51,8 @@ async function fetchVideos() {
         const data = await response.json();
          // Handle the data from the response 
          data.forEach(element => { 
-            videoContainer.innerHTML += videoHTML(element.filepath, element.filename, element.thumbnial, element.created_at); // thumbnial, not thumnail (i gotta fix this shit)
+            const videoElement = videoHTML(element.filepath, element.filename, element.thumbnail, element.created_at);
+            videoContainer.appendChild(videoElement);
         }); 
     } catch (error) {
          // Handle errors that occurred during the fetch 

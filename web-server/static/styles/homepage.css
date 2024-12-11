@@ -1,9 +1,8 @@
 @import "navbar.css";
 
 :root {
-    --navbar_btn: 2px solid #232323;
-    --navbar_btn-radious: 30px;
     --videos-container-radious: 10px;
+    --videos-container-bg: #141414;
 }
 
 /* VIDEO CLASSES */
@@ -32,7 +31,7 @@
         max-width: 300px;
 
         border-radius: var(--videos-container-radious);
-        background-color: black;
+        background-color: var(--videos-container-bg);
     }
 }
 
@@ -45,7 +44,7 @@
         max-width: 100%;
 
         border-radius: var(--videos-container-radious);
-        background-color: black;
+        background-color: var(--videos-container-bg);
     }
 }
 
@@ -69,4 +68,8 @@
 .video-created_at{
     margin-top: auto;
     color: #9a9a9a;
+}
+
+.video-container:hover {
+    background-color: #111111;
 }

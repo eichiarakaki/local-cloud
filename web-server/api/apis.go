@@ -20,7 +20,7 @@ type VideoData struct {
 	ID        int    `json:"id"`
 	Path      string `json:"filepath"`
 	Title     string `json:"filename"`
-	Thumbnail string `json:"thumbnial"`
+	Thumbnail string `json:"thumbnail"`
 	CreatedAt string `json:"created_at"`
 }
 
