@@ -47,7 +47,7 @@ func InitServer() {
 }
 
 func handleConnection(conn net.Conn) {
-	conn.Write([]byte(ServerStatus))
+	// conn.Write([]byte(ServerStatus))
 
 	defer conn.Close()
 

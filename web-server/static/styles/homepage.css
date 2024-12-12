@@ -2,7 +2,7 @@
 
 :root {
     --videos-container-radious: 10px;
-    --videos-container-bg: #141414;
+    --videos-container-bg: #111111;
 }
 
 /* VIDEO CLASSES */
@@ -52,6 +52,7 @@
 .video-thumbnail {
     width: 100%;
     border-radius: var(--videos-container-radious);
+    cursor: pointer;
     
 }
 .video-texts-container {
@@ -71,5 +72,5 @@
 }
 
 .video-container:hover {
-    background-color: #111111;
+    background-color: #141414;
 }
