@@ -47,7 +47,7 @@ func InitServer() {
 }
 
 func handleConnection(conn net.Conn) {
-	// conn.Write([]byte(ServerStatus))
+	conn.Write([]byte(ServerStatus))
 
 	defer conn.Close()
 
@@ -72,6 +72,11 @@ func handleConnection(conn net.Conn) {
 		if err != nil {
 			fmt.Println("Error when reading the data:", err)
 			return
+		}
+		// Commands
+		if data == "serverStatus\n" {
+			conn.Write([]byte(ServerStatus))
+			continue
 		}
 
 		if ServerStatus == Free { // Processing the data when server isn't busy.

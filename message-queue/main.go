@@ -4,10 +4,15 @@ import (
 	"bufio"
 	"fmt"
 	"log"
+	"message-queue/queue"
 	"net"
 	"os"
 	shared "shared_mods"
+	"time"
 )
+
+// Global Variable
+var mainQueue = queue.NewQueue()
 
 func main() {
 	// Loading config
@@ -26,7 +31,7 @@ func main() {
 	defer conn.Close()
 
 	// Making a goroutine for handling infinite responses.
-	ch := make(chan string, 1)
+	responseChannel := make(chan string, 1)
 	go func() {
 		for {
 			// Reads response
@@ -35,25 +40,38 @@ func main() {
 				log.Println("Error when reading from the server:", err)
 				return
 			}
-			ch <- response
+			responseChannel <- response
+		}
+	}()
+
+	go func() {
+		for {
+			fmt.Fprintf(conn, "%s\n", "serverStatus") // Requesting server's status
+
+			mainQueue.PrintQueue()
+			response := <-responseChannel
+			fmt.Println(response)
+
+			if response != "busy\n" {
+				url := mainQueue.Dequeue()
+				if url != "" {
+					fmt.Fprintf(conn, "%s\n", url) // Sends the next URL to the downloader server
+				}
+			}
+			time.Sleep(time.Millisecond * 200)
 		}
 	}()
 
 	scanner := bufio.NewScanner(os.Stdin)
+	var url string
 	for {
 		// Checks if there's input from the user
 		if scanner.Scan() {
-			url := scanner.Text()
-			fmt.Fprintf(conn, "%s\n", url)
+			url = scanner.Text()
+			mainQueue.Enqueue(url)
+			fmt.Printf("%s Enqueued\n", url)
 		} else {
 			break
 		}
-
-		response, ok := <-ch
-		if !ok {
-			log.Println("Server connection closed. Exiting.")
-			break
-		}
-		ResponseHandler(response)
 	}
 }
