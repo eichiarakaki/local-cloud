@@ -31,7 +31,12 @@ func InitServer() {
 		log.Fatalln("Error when initializing the server.", err)
 		return
 	}
-	defer ln.Close()
+	defer func(ln net.Listener) {
+		err := ln.Close()
+		if err != nil {
+			log.Fatalln("[ERROR] When closing the listener.", err)
+		}
+	}(ln)
 
 	log.Println("Server listening on", socket)
 

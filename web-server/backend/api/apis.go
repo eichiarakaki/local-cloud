@@ -4,7 +4,9 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -91,7 +93,7 @@ func GetAllVideos(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	log.Println("INFO: Got a request '/api/videos'.")
+	log.Println("INFO: Got a request to '/api/videos'.")
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(videosData); err != nil {
@@ -123,6 +125,8 @@ func GetVideoByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Printf("INFO: Got a request to '/api/video/%s'.", videoID)
+
 	w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(videodata)
 	if err != nil {
@@ -130,7 +134,7 @@ func GetVideoByID(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Renders the images and videos (by encoded name).
+// ServeStorage Renders the images and videos (by encoded name).
 func ServeStorage(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	mediaName := vars["mediaName"]
@@ -144,7 +148,12 @@ func ServeStorage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Media not found", http.StatusNotFound)
 		return
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			log.Println("[ERROR] Writing media file to disk:", err)
+		}
+	}(file)
 
 	// Getting media's info
 	fileInfo, err := file.Stat()
@@ -173,6 +182,59 @@ func ServeStorage(w http.ResponseWriter, r *http.Request) {
 	http.ServeContent(w, r, fileInfo.Name(), fileInfo.ModTime(), file)
 }
 
+// SendToDownloaderServer Handles the request from the frontend and sends to the message queue socket.
+func SendToDownloaderServer(w http.ResponseWriter, r *http.Request) {
+	// Configuring the CORS headers
+	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3034")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+	// Managing preflight request
+	if r.Method == http.MethodOptions {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
+	// Only allows POST Method
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Reading the requested body
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		log.Println("[ERROR] Reading the body request:", err)
+		http.Error(w, "Failed to read request body:", http.StatusInternalServerError)
+		return
+	}
+
+	// Parsing the JSON received
+	type InputData struct {
+		URL string `json:"url"`
+	}
+
+	var input InputData
+	if err := json.Unmarshal(body, &input); err != nil {
+		log.Println("[ERROR] Parsing the body request:", err)
+		http.Error(w, "Failed to parse the body request:", http.StatusInternalServerError)
+		return
+	}
+
+	// Validates the URL
+	if input.URL == "" {
+		http.Error(w, "Invalid JSON format", http.StatusBadRequest)
+		return
+	}
+
+	// Sending the data to the message queue
+	if err := sendToSocket(shared.MessageQueueSocket, input.URL); err != nil {
+		log.Println("[ERROR] Sending message to server:", err)
+		http.Error(w, "Failed to send message to server:", http.StatusInternalServerError)
+		return
+	}
+}
+
 func Testing(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	ID := vars["id"]
@@ -183,4 +245,24 @@ func Testing(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "Error enconding response", http.StatusInternalServerError)
 	}
+}
+
+func sendToSocket(address string, message string) error {
+	conn, err := net.Dial("tcp", address)
+	if err != nil {
+		return fmt.Errorf("[ERROR] Failed to connect to socket: %w", err)
+	}
+	defer func(conn net.Conn) {
+		err := conn.Close()
+		if err != nil {
+			log.Println("[ERROR] Failed to close socket:", err)
+		}
+	}(conn)
+
+	_, err = conn.Write([]byte(message))
+	if err != nil {
+		return fmt.Errorf("[ERROR] Failed to send to socket: %w", err)
+	}
+
+	return nil
 }

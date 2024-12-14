@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom";
-import { faBars } from "@fortawesome/free-solid-svg-icons";
+import { faDownload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 function Layout() {
@@ -32,7 +32,11 @@ function Layout() {
             "md:hidden pl-6 cursor-pointer justify-center items-center flex"
           }
         >
-          <FontAwesomeIcon icon={faBars} className={"text-2xl"} />
+          <FontAwesomeIcon
+            icon={faDownload}
+            className={"text-lg"}
+            onClick={() => (window.location.href = "/download")}
+          />
         </div>
         {/*For lg > md*/}
         <div className={"hidden md:block"}>
@@ -40,6 +44,7 @@ function Layout() {
             className={
               "px-5 py-2 bg-zinc-900 rounded-md border border-zinc-700 cursor-pointer hover:bg-zinc-700 duration-100"
             }
+            onClick={() => (window.location.href = "/download")}
           >
             Download
           </h1>

@@ -21,14 +21,19 @@ func main() {
 		log.Fatalln(err)
 	}
 	// Getting socket from the loaded config
-	socket := shared.DownloaderServerSocket
+	downloaderServerSocket := shared.DownloaderServerSocket
 
-	// Initializing connection to the socket.
-	conn, err := net.Dial("tcp", socket)
+	// Initializing connection to the Downloader server.
+	conn, err := net.Dial("tcp", downloaderServerSocket)
 	if err != nil {
-		log.Println("Couldn't connect to the downloader server:", err)
+		log.Println("[ERROR] Couldn't connect to the downloader server:", err)
 	}
-	defer conn.Close()
+	defer func(conn net.Conn) {
+		err := conn.Close()
+		if err != nil {
+			log.Println("[ERROR] Couldn't close the connection:", err)
+		}
+	}(conn)
 
 	// Making a goroutine for handling infinite responses.
 	responseChannel := make(chan string)
@@ -44,12 +49,12 @@ func main() {
 		}
 	}()
 
-	// A Go-routine to know the Downlaoder Server status
+	// A Go-routine to know the Downloader Server status
 	var response string
 	go func() {
 		for {
 			response = <-responseChannel
-			log.Println("INFO: New response from the Downloader Server:", response)
+			log.Println("[INFO] New response from the Downloader Server:", response)
 		}
 	}()
 
@@ -59,14 +64,17 @@ func main() {
 			if response == "free\n" && !mainQueue.IsEmpty() { // If Downloader Server is free and the queue isn't empty
 				url := mainQueue.Dequeue()
 				if url != "" {
-					fmt.Fprintf(conn, "lock %s\n", url) // Sends the next URL to the downloader server
+					_, err = fmt.Fprintf(conn, "lock %s\n", url) // Sends the next URL to the downloader server
+					if err != nil {
+						log.Println("[ERROR]", err)
+					}
 				}
 
-				log.Println("INFO: Sent to the downloader server.")
+				log.Println("[INFO] Sent to the downloader server.")
 			}
 
 			if response == "busy\n" {
-				log.Println("INFO: Downloader Server is busy.")
+				log.Println("[INFO] Downloader Server is busy.")
 			}
 
 			time.Sleep(time.Second * 2)
