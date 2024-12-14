@@ -35,6 +35,7 @@ func GetAllVideos(w http.ResponseWriter, r *http.Request) {
 	cmd := fmt.Sprintf("SELECT id, filepath, filename, thumbnail, created_at FROM %s", shared.MySQLTableName)
 	rows, err := db.Query(cmd)
 	if err != nil {
+		// In most cases, this error occurs because the table does not exist in the database, either way it returns an empty json to the frontend.
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
 		_, err := w.Write([]byte("[]"))
@@ -45,6 +46,7 @@ func GetAllVideos(w http.ResponseWriter, r *http.Request) {
 	}
 	defer rows.Close()
 
+	// This handles when there's a table but it is an EMPTY table.
 	if !rows.Next() {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)

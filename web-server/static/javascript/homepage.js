@@ -50,7 +50,7 @@ async function fetchVideos() {
         const data = await response.json();
 
         if (data.length === 0) {
-            videoContainer.appendChild(VideosNotFound("There are no available.", "There was a problem fetching the database content. Database might be empty."));    
+            videoContainer.appendChild(VideosNotFound("There are no available videos.", "There was a problem fetching the database content. Database might be empty."));    
         } else {
             // Handle the data from the response
             data.forEach(element => { 
