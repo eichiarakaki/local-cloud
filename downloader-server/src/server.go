@@ -53,9 +53,16 @@ func InitServer() {
 }
 
 func handleConnection(conn net.Conn) {
-	conn.Write([]byte(ServerStatus))
-
-	defer conn.Close()
+	_, err := conn.Write([]byte(ServerStatus))
+	if err != nil {
+		log.Println("[ERROR] When writing to connection:", err)
+	}
+	defer func(conn net.Conn) {
+		err := conn.Close()
+		if err != nil {
+			log.Println("[ERROR] When closing the connection:", err)
+		}
+	}(conn)
 
 	// Read the data from the client
 	reader := bufio.NewReader(conn)
@@ -71,8 +78,9 @@ func handleConnection(conn net.Conn) {
 		dataDecom, err := RDataWrapper(data)
 		if err != nil {
 			log.Printf("ERROR: %s\n", err)
+		} else {
+			log.Printf("[INFO] Commmand: %s. URL: %s\n", dataDecom.Command, dataDecom.URL)
 		}
-		log.Printf("INFO:\nCommmand: %s\nURL: %s\n", dataDecom.Command, dataDecom.URL)
 
 		// Commands
 		if strings.HasPrefix(dataDecom.Command, "test") {
@@ -98,7 +106,11 @@ func handleConnection(conn net.Conn) {
 				mu.Unlock()
 
 				log.Println("INFO: URL Filtered.")
-				conn.Write([]byte(ServerStatus))
+				_, err := conn.Write([]byte(ServerStatus))
+				if err != nil {
+					log.Println("[ERROR] When sending current Server Status:", err)
+					return
+				}
 
 				mu.Lock()
 				ServerStatus = Free

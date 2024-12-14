@@ -146,7 +146,7 @@ func filterVideoTitle(fullPath string) string {
 	return fileName
 }
 
-// Transforms to MP4 format to have compatibility with IOS devices, since IOS does not have support for mkv in web browsers like Safari.
+// MP4Transformer Transforms to MP4 format to have compatibility with IOS devices, since IOS does not have support for mkv in web browsers like Safari.
 func MP4Transformer(inputPath string) (string, error) {
 	log.Println("INFO: Transforming file to MP4 format...")
 	// Extract the folder and the file name
@@ -204,7 +204,7 @@ func MP4Transformer(inputPath string) (string, error) {
 	return outputPath, nil
 }
 
-// Creates the thumbnail if it doesn't exists, and only returns the full path to the thumbnail if exists.
+// Creates the thumbnail if it doesn't exist, and only returns the full path to the thumbnail if exists.
 func extractThumbnail(fullpath string, filename string) (string, error) {
 	thumbnailTmpl := fmt.Sprintf("%s%s_thumbnail.webp", shared.VideoStoragePath, filename)
 	// fmt.Printf("the thumbnail: %s\nthe fullpath: %s\n", thumbnailTmpl, fullpath)

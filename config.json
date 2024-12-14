@@ -6,7 +6,7 @@
   "mysql-table-name": "localcloud",
 
   "downloader-socket": "localhost:3031",
-  "message-socket": "localhost:3032",
+  "message-queue-socket": "localhost:3032",
   "webserver-backend-socket": "0.0.0.0:3033",
   "webserver-frontend-port": "3034"
 }

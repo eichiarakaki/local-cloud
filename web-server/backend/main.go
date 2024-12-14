@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/rs/cors"
 	"log"
 	"net/http"
 	shared "shared_mods"
@@ -32,7 +33,7 @@ func main() {
 	// router.Use(middleware.APIFilter)
 
 	server := &http.Server{
-		Handler:      router,
+		Handler:      cors.Default().Handler(router),
 		Addr:         socket,
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,

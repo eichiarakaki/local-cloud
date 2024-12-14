@@ -3,10 +3,10 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"log"
 	"message-queue/queue"
 	"net"
-	"os"
 	shared "shared_mods"
 	"time"
 )
@@ -59,6 +59,7 @@ func main() {
 	}()
 
 	// Handling the response from the Downloader Server
+	var prevResponse string
 	go func() {
 		for {
 			if response == "free\n" && !mainQueue.IsEmpty() { // If Downloader Server is free and the queue isn't empty
@@ -73,25 +74,61 @@ func main() {
 				log.Println("[INFO] Sent to the downloader server.")
 			}
 
-			if response == "busy\n" {
+			if response == "busy\n" && prevResponse != "busy\n" {
 				log.Println("[INFO] Downloader Server is busy.")
 			}
 
+			prevResponse = response
 			time.Sleep(time.Second * 2)
 		}
 
 	}()
 
-	scanner := bufio.NewScanner(os.Stdin)
-	var url string
-	for {
-		// Checks if there's input from the user
-		if scanner.Scan() {
-			url = scanner.Text()
-			mainQueue.Enqueue(url)
-			mainQueue.PrintQueue()
-		} else {
-			break
+	// Initializing Server to handle requests from the backend
+	messageQueueSocket := shared.MessageQueueSocket
+	ln, err := net.Listen("tcp", messageQueueSocket)
+	if err != nil {
+		log.Fatalln("Error when initializing the server.", err)
+		return
+	}
+	defer func(ln net.Listener) {
+		err := ln.Close()
+		if err != nil {
+			log.Fatalln("[ERROR] When closing the listener.", err)
 		}
+	}(ln)
+
+	log.Println("[INFO] Message Queue listening on", messageQueueSocket)
+
+	for {
+		conn, err := ln.Accept()
+		if err != nil {
+			log.Println("[ERROR] Couldn't accept the connection.", err)
+			continue
+		}
+		// Handling connection
+		go handleConnection(conn)
+	}
+}
+
+func handleConnection(conn net.Conn) {
+
+	// Reading from the TCP
+	reader := bufio.NewReader(conn)
+
+	for {
+		data, err := reader.ReadString('\n')
+		if err != nil {
+			if err == io.EOF {
+				return
+			} else {
+				log.Println("[ERROR] Couldn't read from the connection:", err)
+				return
+			}
+		}
+		log.Printf("[INFO] Got %s from the backend\n", data)
+
+		mainQueue.Enqueue(data)
+		mainQueue.PrintQueue()
 	}
 }

@@ -3,8 +3,8 @@ package api
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"io"
 	"log"
 	"net"
 	"net/http"
@@ -32,7 +32,12 @@ func GetAllVideos(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 	}
-	defer db.Close()
+	defer func(db *sql.DB) {
+		err := db.Close()
+		if err != nil {
+			log.Printf("[ERROR] Closing db connection")
+		}
+	}(db)
 
 	cmd := fmt.Sprintf("SELECT id, filepath, filename, thumbnail, created_at FROM %s", shared.MySQLTableName)
 	rows, err := db.Query(cmd)
@@ -46,9 +51,14 @@ func GetAllVideos(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	defer rows.Close()
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			log.Println("[ERROR] Closing rows:", err)
+		}
+	}(rows)
 
-	// This handles when there's a table but it is an EMPTY table.
+	// This handles when there's a table, but it is an EMPTY table.
 	if !rows.Next() {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
@@ -88,7 +98,7 @@ func GetAllVideos(w http.ResponseWriter, r *http.Request) {
 
 		videosData = append(videosData, aVideoData)
 
-		if !rows.Next() { // Exits the loop if there a re no more rows
+		if !rows.Next() { // Exits the loop if there are no more rows
 			break
 		}
 	}
@@ -102,7 +112,7 @@ func GetAllVideos(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Returns a JSON for rendering in the frontend.
+// GetVideoByID Returns a JSON for rendering in the frontend.
 func GetVideoByID(w http.ResponseWriter, r *http.Request) {
 	db, err := src.ConnectDB()
 	if err != nil {
@@ -117,7 +127,7 @@ func GetVideoByID(w http.ResponseWriter, r *http.Request) {
 	query := fmt.Sprintf("SELECT id, filepath, filename, thumbnail, created_at FROM %s WHERE id = ?", shared.MySQLTableName)
 	err = db.QueryRow(query, videoID).Scan(&videodata.ID, &videodata.Path, &videodata.Title, &videodata.Thumbnail, &videodata.CreatedAt)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			http.Error(w, "Video Not Found.", http.StatusNotFound)
 		} else {
 			http.Error(w, "Error when consulting.", http.StatusInsufficientStorage)
@@ -201,38 +211,38 @@ func SendToDownloaderServer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Reading the requested body
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		log.Println("[ERROR] Reading the body request:", err)
-		http.Error(w, "Failed to read request body:", http.StatusInternalServerError)
-		return
-	}
-
 	// Parsing the JSON received
-	type InputData struct {
+	var requestBody struct {
 		URL string `json:"url"`
 	}
 
-	var input InputData
-	if err := json.Unmarshal(body, &input); err != nil {
-		log.Println("[ERROR] Parsing the body request:", err)
-		http.Error(w, "Failed to parse the body request:", http.StatusInternalServerError)
+	err := json.NewDecoder(r.Body).Decode(&requestBody)
+	if err != nil {
+		http.Error(w, "Error parsing request body", http.StatusBadRequest)
 		return
 	}
 
 	// Validates the URL
-	if input.URL == "" {
+	if requestBody.URL == "" {
 		http.Error(w, "Invalid JSON format", http.StatusBadRequest)
 		return
 	}
 
 	// Sending the data to the message queue
-	if err := sendToSocket(shared.MessageQueueSocket, input.URL); err != nil {
+	if err := sendToSocket(shared.MessageQueueSocket, requestBody.URL); err != nil {
 		log.Println("[ERROR] Sending message to server:", err)
 		http.Error(w, "Failed to send message to server:", http.StatusInternalServerError)
 		return
 	}
+
+	// Response to the frontend
+	w.WriteHeader(http.StatusOK)
+	response := map[string]string{"message": "URL received successfully."}
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, "Error encoding JSON", http.StatusInternalServerError)
+	}
+
 }
 
 func Testing(w http.ResponseWriter, r *http.Request) {
@@ -243,7 +253,7 @@ func Testing(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewEncoder(w).Encode(ID)
 	if err != nil {
-		http.Error(w, "Error enconding response", http.StatusInternalServerError)
+		http.Error(w, "Error encoding response", http.StatusInternalServerError)
 	}
 }
 

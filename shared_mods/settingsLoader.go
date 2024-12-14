@@ -18,7 +18,7 @@ var (
 	WebServerFrontendPort  string
 )
 
-// Must match with the JSON properties.
+// Config Must match with the JSON properties.
 type Config struct {
 	VideoStoragePath       string `json:"video-storage-path"`
 	MySQLConn              string `json:"mysql-conn"`
@@ -30,25 +30,25 @@ type Config struct {
 	WebServerFrontendPort  string `json:"webserver-frontend-port"`
 }
 
-// This function should be called only once in each main function of each library that wants to use these global variables.
+// LoadConfig This function should be called only once in each main function of each library that wants to use these global variables.
 func LoadConfig(configFilePath string) error {
 	// config.json MUST BE ON THE ROOT DIR.
 	file, err := os.Open(configFilePath)
 	if err != nil {
-		return fmt.Errorf("Error while opening the config file: %s", err)
+		return fmt.Errorf("error while opening the config file: %s", err)
 	}
 	defer file.Close()
 
 	// Reads the file content
 	bytes, err := io.ReadAll(file)
 	if err != nil {
-		return fmt.Errorf("Error when reading the config file: %s", err)
+		return fmt.Errorf("error when reading the config file: %s", err)
 	}
 
 	// Deserializing the JSON into a 'Config struct'
 	var config Config
 	if err := json.Unmarshal(bytes, &config); err != nil {
-		return fmt.Errorf("Error when deserializing the JSON file: %s", err)
+		return fmt.Errorf("error when deserializing the JSON file: %s", err)
 	}
 
 	VideoStoragePath = config.VideoStoragePath

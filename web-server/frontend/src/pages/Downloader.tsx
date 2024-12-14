@@ -1,7 +1,13 @@
 import React, { useState } from "react";
 
+interface ResponseData {
+  message: string;
+}
+
 function Downloader() {
   const [inputValue, setInputValue] = useState<string>("");
+  const [data, setData] = useState<ResponseData | undefined>();
+
   const handleKeyDown = async (
     event: React.KeyboardEvent<HTMLInputElement>,
   ) => {
@@ -14,16 +20,18 @@ function Downloader() {
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ url: inputValue }),
+            body: JSON.stringify({ url: inputValue + "\n" }),
           },
         );
 
         if (!response.ok) {
-          console.error("Error in POST request:", response.statusText);
+          console.error("Error in POST request:", response);
         } else {
           const data = await response.json();
-          console.log("Response from API:", data);
+          setData(data);
         }
+
+        setInputValue("");
       } catch (error) {
         console.error("Error sending POST request:", error);
       }
@@ -39,6 +47,7 @@ function Downloader() {
       <input
         type="text"
         placeholder={""}
+        value={inputValue}
         onChange={(event) => setInputValue(event.target.value)}
         onKeyDown={handleKeyDown}
         className={
@@ -49,6 +58,13 @@ function Downloader() {
           " duration-100"
         }
       />
+      <div className={"mt-10"}>
+        {data ? (
+          <span className={"text-green-600"}>{data.message}</span>
+        ) : (
+          "Waiting for input..."
+        )}
+      </div>
     </div>
   );
 }
