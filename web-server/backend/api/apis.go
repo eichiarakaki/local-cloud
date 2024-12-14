@@ -91,6 +91,8 @@ func GetAllVideos(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	log.Println("INFO: Got a request '/api/videos'.")
+
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(videosData); err != nil {
 		log.Println(err)
