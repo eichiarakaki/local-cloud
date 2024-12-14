@@ -12,7 +12,7 @@ import (
 	shared "shared_mods"
 	"strings"
 
-	"github.com/eichiarakaki/local-cloud/src"
+	"github.com/eichiarakaki/local-cloud/web-server/backend/src"
 	"github.com/gorilla/mux"
 )
 
@@ -174,20 +174,11 @@ func ServeStorage(w http.ResponseWriter, r *http.Request) {
 func Testing(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	ID := vars["id"]
-	imagePath := fmt.Sprintf("./static/test/%s", ID)
 
-	file, err := os.Open(imagePath)
-	if err != nil {
-		http.Error(w, "Image not found!", http.StatusNotFound)
-		return
-	}
-	defer file.Close()
+	w.Header().Set("Content-Type", "application/json")
 
-	w.Header().Set("Content-Type", "image/webp")
-	fileInfo, err := file.Stat()
+	err := json.NewEncoder(w).Encode(ID)
 	if err != nil {
-		http.Error(w, "Error reading file", http.StatusInternalServerError)
-		return
+		http.Error(w, "Error enconding response", http.StatusInternalServerError)
 	}
-	http.ServeContent(w, r, fileInfo.Name(), fileInfo.ModTime(), file)
 }

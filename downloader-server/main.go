@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	err := shared.LoadConfig() // Gets config.json properties.
+	err := shared.LoadConfig("../config.json") // Gets config.json properties.
 	if err != nil {
 		log.Fatalf("%s\n", err)
 		return

@@ -29,10 +29,9 @@ type Config struct {
 }
 
 // This function should be called only once in each main function of each library that wants to use these global variables.
-func LoadConfig() error {
+func LoadConfig(configFilePath string) error {
 	// config.json MUST BE ON THE ROOT DIR.
-	// This file should be on src for this to work propertly.
-	file, err := os.Open("../config.json")
+	file, err := os.Open(configFilePath)
 	if err != nil {
 		return fmt.Errorf("Error while opening the config file: %s", err)
 	}

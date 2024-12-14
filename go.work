@@ -4,5 +4,5 @@ use (
 	./downloader-server
 	./message-queue
 	./shared_mods
-	./web-server
+	./web-server/backend
 )

@@ -1,4 +1,4 @@
-module github.com/eichiarakaki/local-cloud
+module github.com/eichiarakaki/local-cloud/web-server/backend
 
 go 1.22.7
 

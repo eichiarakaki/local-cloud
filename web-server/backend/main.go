@@ -6,14 +6,13 @@ import (
 	shared "shared_mods"
 	"time"
 
-	"github.com/eichiarakaki/local-cloud/api"
-	"github.com/eichiarakaki/local-cloud/utils"
-	"github.com/eichiarakaki/local-cloud/web"
+	"github.com/eichiarakaki/local-cloud/web-server/backend/api"
+	"github.com/eichiarakaki/local-cloud/web-server/backend/utils"
 	"github.com/gorilla/mux"
 )
 
 func main() {
-	err := shared.LoadConfig()
+	err := shared.LoadConfig("../../config.json")
 	if err != nil {
 		log.Fatalf("%s\n", err)
 	}
@@ -21,7 +20,8 @@ func main() {
 
 	router := mux.NewRouter()
 	// Adding Web router
-	web.RegisterWebRouter(router)
+	//web.RegisterWebRouter(router) // No need anymore because frontend is in a other folder.
+
 	// Adding API router
 	api.RegisterAPIRouter(router)
 

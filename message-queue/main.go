@@ -16,7 +16,7 @@ var mainQueue = queue.NewQueue()
 
 func main() {
 	// Loading config
-	err := shared.LoadConfig()
+	err := shared.LoadConfig("../config.json")
 	if err != nil {
 		log.Fatalln(err)
 	}
