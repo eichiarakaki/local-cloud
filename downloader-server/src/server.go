@@ -57,27 +57,18 @@ func handleConnection(conn net.Conn) {
 
 	// Sending cycle: Listening for inputs -> Server Status (Free) -> Busy -> (Finishes downlading) Free -> To the beginning.
 	for {
-		// switch ServerStatus {
-		// case Free:
-		// 	log.Println("Server's free, waiting for the message queue.")
-		// case InvalidURL:
-		// 	log.Println("Server's free, input a valid URL.")
-		// default:
-		// 	log.Println("Server's working, wait for it.")
-		// }
-
 		data, err := reader.ReadString('\n')
 		if err != nil {
 			fmt.Println("Error when reading the data:", err)
 			return
 		}
-		
-    dataDecom, err := RDataWrapper(data)
-    if err != nil {
-      log.Printf("ERROR: %s\n", err)
-    }
-    log.Printf("INFO:\nCommmand: %s\nURL: %s\n", dataDecom.Command, dataDecom.URL)
-    
+
+		dataDecom, err := RDataWrapper(data)
+		if err != nil {
+			log.Printf("ERROR: %s\n", err)
+		}
+		log.Printf("INFO:\nCommmand: %s\nURL: %s\n", dataDecom.Command, dataDecom.URL)
+
 		// Commands
 		if strings.HasPrefix(dataDecom.Command, "test") {
 			_, err := URLFilter(dataDecom.URL)
@@ -92,7 +83,7 @@ func handleConnection(conn net.Conn) {
 			ServerStatus = Busy
 			mu.Unlock()
 
-      fmt.Printf("Got a LOCK signal.\n")
+			log.Printf("INFO: Got a lock signal.\n")
 
 			url, err := URLFilter(dataDecom.URL) // Filters invalid URLs
 			// If url is invalid
@@ -100,8 +91,8 @@ func handleConnection(conn net.Conn) {
 				mu.Lock()
 				ServerStatus = InvalidURL
 				mu.Unlock()
-        
-        log.Println("INFO: URL Filtered.")
+
+				log.Println("INFO: URL Filtered.")
 				conn.Write([]byte(ServerStatus))
 
 				mu.Lock()
@@ -111,8 +102,7 @@ func handleConnection(conn net.Conn) {
 				continue
 			}
 
-      fmt.Printf("Start downloading.\n")
-			// conn.Write([]byte(ServerStatus))
+			fmt.Printf("Start downloading.\n")
 			StartDownload(url, conn)
 		}
 	}

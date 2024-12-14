@@ -1,5 +1,8 @@
 'use strict';
 
+import { VideosNotFound } from './emptyContent.js';
+
+
 const videoContainer = document.getElementById("videos-container");
 
 function videoHTML(filepath, title, thumbnail, created_at) {
@@ -43,22 +46,23 @@ const videosURL = `${APIPrefix}/videos`;
 async function fetchVideos() { 
     try { 
         const response = await fetch(videosURL); 
-        // Check if the response is ok (status code 200-299) 
-        if (!response.ok) { 
-            throw new Error("Network response was not ok " + response.statusText); 
-        } 
         // Parse the JSON from the response 
         const data = await response.json();
-         // Handle the data from the response 
-         data.forEach(element => { 
-            const videoElement = videoHTML(element.filepath, element.filename, element.thumbnail, element.created_at);
-            videoContainer.appendChild(videoElement);
-        }); 
+
+        if (data.length === 0) {
+            videoContainer.appendChild(VideosNotFound("There are no available.", "There was a problem fetching the database content. Database might be empty."));    
+        } else {
+            // Handle the data from the response
+            data.forEach(element => { 
+                const videoElement = videoHTML(element.filepath, element.filename, element.thumbnail, element.created_at);
+                videoContainer.appendChild(videoElement);
+            });
+        }
     } catch (error) {
-         // Handle errors that occurred during the fetch 
-         console.error("There was a problem with the fetch operation:", error); 
-        } 
-    } // Call the function to fetch videos 
+        // Handle errors that occurred during the fetch 
+         console.error(`There was a problem with the fetch operation: ${error}`); 
+    }
+} // Call the function to fetch videos
 fetchVideos();
 
 function openVideo(videoName, videoTitle, embedVideo, createdAt) {

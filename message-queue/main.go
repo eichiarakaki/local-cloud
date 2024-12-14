@@ -44,7 +44,7 @@ func main() {
 		}
 	}()
 
-	// A special goroutine to know the Downlaoder Server status
+	// A Go-routine to know the Downlaoder Server status
 	var response string
 	go func() {
 		for {

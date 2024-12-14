@@ -31,3 +31,23 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background: #555; 
 }
+
+.not-found {
+    margin-top: 50px;
+    user-select: none;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    
+    text-align: center;
+    align-items: center;
+}
+
+.not-found-title {
+    font-size: 25px;
+}
+
+.not-found-subtitle {
+    font-size: 15px;
+    color: #777777;
+}

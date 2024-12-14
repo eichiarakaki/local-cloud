@@ -35,15 +35,36 @@ func GetAllVideos(w http.ResponseWriter, r *http.Request) {
 	cmd := fmt.Sprintf("SELECT id, filepath, filename, thumbnail, created_at FROM %s", shared.MySQLTableName)
 	rows, err := db.Query(cmd)
 	if err != nil {
-		http.Error(w, "Error when consulting the database.", http.StatusInternalServerError)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		_, err := w.Write([]byte("[]"))
+		if err != nil {
+			log.Println("ERROR: writing empty JSON response:", err)
+		}
+		return
 	}
 	defer rows.Close()
 
+	if !rows.Next() {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_, err := w.Write([]byte("[]"))
+		if err != nil {
+			log.Println("ERROR: writing empty JSON response:", err)
+		}
+		return
+	}
+
 	// Process the query results
 	var videosData []VideoData
-	for rows.Next() {
+	for {
 		var aVideoData VideoData
-		if err := rows.Scan(&aVideoData.ID, &aVideoData.Path, &aVideoData.Title, &aVideoData.Thumbnail, &aVideoData.CreatedAt); err != nil {
+		if err := rows.Scan(
+			&aVideoData.ID,
+			&aVideoData.Path,
+			&aVideoData.Title,
+			&aVideoData.Thumbnail,
+			&aVideoData.CreatedAt); err != nil {
 			log.Println(err)
 			http.Error(w, "Error processing the data", http.StatusInternalServerError)
 			return
@@ -62,6 +83,10 @@ func GetAllVideos(w http.ResponseWriter, r *http.Request) {
 		aVideoData.Thumbnail = decodedThumbnail
 
 		videosData = append(videosData, aVideoData)
+
+		if !rows.Next() { // Exits the loop if there a re no more rows
+			break
+		}
 	}
 
 	w.Header().Set("Content-Type", "application/json")
