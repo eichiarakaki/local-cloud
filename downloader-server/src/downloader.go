@@ -7,23 +7,23 @@ To-Do
 import (
 	"fmt"
 	"log"
+	"net"
 	"os"
 	"os/exec"
+	"path/filepath"
 	shared "shared_mods"
 	"strings"
 )
 
-func StartDownload(url string) {
-	mu.Lock()
-	ServerStatus = Busy // Changes status to busy server
-	mu.Unlock()
+func StartDownload(url string, conn net.Conn) {
+	conn.Write([]byte(ServerStatus))
+	log.Printf("INFO: Processing %s\n", url)
 
-	go func() {
-		Download(url)
-		mu.Lock()
-		ServerStatus = Free // Changes Status to free server
-		mu.Unlock()
-	}()
+	Download(url)
+	mu.Lock()
+	ServerStatus = Free // Changes Status to free server
+	mu.Unlock()
+	conn.Write([]byte(ServerStatus)) // Sends the status to the frontend immediately after the download ends
 }
 
 /*
@@ -87,6 +87,12 @@ func dbWrapper(output []byte) (*VideoData, error) {
 		log.Fatalln(err)
 	}
 
+	// Converting from any format to mp4
+	fullfilepath, err = MP4Transformer(fullfilepath)
+	if err != nil {
+		log.Fatalf("WARNING: Couldn't convert %s to mp4: %s\n", fullfilepath, err)
+	}
+
 	data.Path = fullfilepath
 	data.Title = filename
 	data.Thumbnail = thumbnailPath
@@ -138,6 +144,64 @@ func filterVideoTitle(fullPath string) string {
 		}
 	}
 	return fileName
+}
+
+// Transforms to MP4 format to have compatibility with IOS devices, since IOS does not have support for mkv in web browsers like Safari.
+func MP4Transformer(inputPath string) (string, error) {
+	log.Println("INFO: Transforming file to MP4 format...")
+	// Extract the folder and the file name
+	dir := filepath.Dir(inputPath)
+	baseName := strings.TrimSuffix(filepath.Base(inputPath), filepath.Ext(inputPath)) // Gets the filename without the extension.
+
+	// Create the output file path with the .mp4 extension.
+	outputPath := filepath.Join(dir, baseName+".mp4")
+
+	// FFmpeg command for converting the file.
+	cmd := exec.Command(
+		"ffmpeg",
+		"-i", inputPath, // Input file
+
+		"-vcodec", "libx264", // Codification video en H.264
+
+		/*
+		 Options:
+		 ultrafast: Fast but worse file compresion.
+		 faster: Faster than average, but without sacrificing too much quality.
+		 medium: Balance between speed and quality (default in FFmpeg).
+		 slow: Slow, but better file compresion.
+		 veryslow: Very slow, but optimal compresion.
+		*/
+		"-preset", "faster",
+
+		// Range: 0-51. Recommended range: 18-23.
+		"-crf", "18", // Constant rate factor for similar quality
+
+		"-acodec", "aac", // AAC audio encoding
+
+		// 128k (acceptable audio quality).
+		// 192k (high audio quality).
+		// 320k (max audio quality).
+		"-b:a", "192k", // Audio bitrate similar to the original
+
+		"-strict", "experimental", // AAC support
+		outputPath,
+	)
+
+	// Executes the command
+	err := cmd.Run()
+	if err != nil {
+		return inputPath, err // If there's an error, just returns que input file.
+	}
+
+	// Removing the input file (already downloaded) since it will no longer be used.
+	err = os.Remove(inputPath)
+	if err != nil {
+		log.Printf("WARNING: %s removed unsuccessfully. Remove it by yourself.", err)
+	} else {
+		log.Printf("INFO: %s removed successfully.", inputPath)
+	}
+
+	return outputPath, nil
 }
 
 // Creates the thumbnail if it doesn't exists, and only returns the full path to the thumbnail if exists.

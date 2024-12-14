@@ -2,6 +2,7 @@ package queue
 
 import (
 	"fmt"
+	"strings"
 )
 
 /*
@@ -25,6 +26,11 @@ func NewQueue() *QueueList {
 }
 
 func (q *QueueList) Enqueue(URL string) {
+  // Do nothing if the url is empty
+  if strings.TrimSpace(URL) == "" {
+    return
+  }
+
 	newNode := &Node{Value: URL}
 	if q.List == nil {
 		q.List = newNode
@@ -56,3 +62,26 @@ func (q *QueueList) PrintQueue() {
 		auxNode = auxNode.NN
 	}
 }
+
+func (q *QueueList) IsEmpty() bool {
+	return q.List == nil
+}
+
+// func (q *QueueList) SafeRequest(conn net.Conn) {
+// 	// Getting the value to send to the server
+// 	var firstNodeValue string
+// 	if q.List != nil {
+// 		firstNodeValue = q.List.Value // if q.List is NOT nil, it means q.List.Value has a value.
+// 	}
+
+// 	// Sending the value to the server
+// 	toSend := fmt.Sprintf("test %s", firstNodeValue)
+// 	conn.Write([]byte(toSend))
+// 	// Reading the server's response
+// 	response, err := bufio.NewReader(conn).ReadString('\n')
+// 	if err != nil {
+// 		log.Println("Error when reading from the server:", err)
+// 		return
+// 	}
+
+// }

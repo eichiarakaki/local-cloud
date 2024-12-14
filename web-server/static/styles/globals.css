@@ -10,3 +10,24 @@ body {
     color: #ffffff;
     background-color: #111111;
 }
+
+/* Scrollbar theme */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px; 
+}
+
+::-webkit-scrollbar-track {
+    background: #111; 
+    border-radius: 10px;
+}
+
+/* "thumb" style */
+::-webkit-scrollbar-thumb {
+    background: #333; 
+    border-radius: 10px; 
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555; 
+}

@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	shared "shared_mods"
+	"strings"
 	"sync"
 )
 
@@ -54,44 +55,65 @@ func handleConnection(conn net.Conn) {
 	// Read the data from the client
 	reader := bufio.NewReader(conn)
 
+	// Sending cycle: Listening for inputs -> Server Status (Free) -> Busy -> (Finishes downlading) Free -> To the beginning.
 	for {
-		if ServerStatus != Busy && ServerStatus == InvalidURL {
-			ServerStatus = Free
-		}
-
-		switch ServerStatus {
-		case Free:
-			log.Println("Server's free, waiting for the message queue.")
-		case InvalidURL:
-			log.Println("Server's free, input a valid URL.")
-		default:
-			log.Println("Server's working, wait for it.")
-		}
+		// switch ServerStatus {
+		// case Free:
+		// 	log.Println("Server's free, waiting for the message queue.")
+		// case InvalidURL:
+		// 	log.Println("Server's free, input a valid URL.")
+		// default:
+		// 	log.Println("Server's working, wait for it.")
+		// }
 
 		data, err := reader.ReadString('\n')
 		if err != nil {
 			fmt.Println("Error when reading the data:", err)
 			return
 		}
+		
+    dataDecom, err := RDataWrapper(data)
+    if err != nil {
+      log.Printf("ERROR: %s\n", err)
+    }
+    log.Printf("INFO:\nCommmand: %s\nURL: %s\n", dataDecom.Command, dataDecom.URL)
+    
 		// Commands
-		if data == "serverStatus\n" {
-			conn.Write([]byte(ServerStatus))
+		if strings.HasPrefix(dataDecom.Command, "test") {
+			_, err := URLFilter(dataDecom.URL)
+			if err != nil {
+				conn.Write([]byte("test inurl"))
+			} else {
+				conn.Write([]byte("test vaurl"))
+			}
 			continue
-		}
+		} else if strings.HasPrefix(data, "lock") && ServerStatus == Free {
+			mu.Lock()
+			ServerStatus = Busy
+			mu.Unlock()
 
-		if ServerStatus == Free { // Processing the data when server isn't busy.
-			url, err := URLFilter(data) // Filters invalid URLs
-			if err != nil {             // If url is invalid
+      fmt.Printf("Got a LOCK signal.\n")
+
+			url, err := URLFilter(dataDecom.URL) // Filters invalid URLs
+			// If url is invalid
+			if err != nil {
 				mu.Lock()
 				ServerStatus = InvalidURL
 				mu.Unlock()
+        
+        log.Println("INFO: URL Filtered.")
 				conn.Write([]byte(ServerStatus))
+
+				mu.Lock()
+				ServerStatus = Free
+				mu.Unlock()
+
 				continue
 			}
-			conn.Write([]byte(ServerStatus))
-			StartDownload(url)
-		} else {
-			conn.Write([]byte(ServerStatus))
+
+      fmt.Printf("Start downloading.\n")
+			// conn.Write([]byte(ServerStatus))
+			StartDownload(url, conn)
 		}
 	}
 }

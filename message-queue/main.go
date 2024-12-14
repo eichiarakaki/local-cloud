@@ -31,7 +31,7 @@ func main() {
 	defer conn.Close()
 
 	// Making a goroutine for handling infinite responses.
-	responseChannel := make(chan string, 1)
+	responseChannel := make(chan string)
 	go func() {
 		for {
 			// Reads response
@@ -44,22 +44,34 @@ func main() {
 		}
 	}()
 
+	// A special goroutine to know the Downlaoder Server status
+	var response string
 	go func() {
 		for {
-			fmt.Fprintf(conn, "%s\n", "serverStatus") // Requesting server's status
+			response = <-responseChannel
+			log.Println("INFO: New response from the Downloader Server:", response)
+		}
+	}()
 
-			mainQueue.PrintQueue()
-			response := <-responseChannel
-			fmt.Println(response)
-
-			if response != "busy\n" {
+	// Handling the response from the Downloader Server
+	go func() {
+		for {
+			if response == "free\n" && !mainQueue.IsEmpty() { // If Downloader Server is free and the queue isn't empty
 				url := mainQueue.Dequeue()
 				if url != "" {
-					fmt.Fprintf(conn, "%s\n", url) // Sends the next URL to the downloader server
+					fmt.Fprintf(conn, "lock %s\n", url) // Sends the next URL to the downloader server
 				}
+
+				log.Println("INFO: Sent to the downloader server.")
 			}
-			time.Sleep(time.Millisecond * 200)
+
+			if response == "busy\n" {
+				log.Println("INFO: Downloader Server is busy.")
+			}
+
+			time.Sleep(time.Second * 2)
 		}
+
 	}()
 
 	scanner := bufio.NewScanner(os.Stdin)
@@ -69,7 +81,7 @@ func main() {
 		if scanner.Scan() {
 			url = scanner.Text()
 			mainQueue.Enqueue(url)
-			fmt.Printf("%s Enqueued\n", url)
+			mainQueue.PrintQueue()
 		} else {
 			break
 		}
