@@ -22,7 +22,7 @@ func APIFilter(next http.Handler) http.Handler {
 		// Check if the request is from the server
 		if strings.HasPrefix(r.URL.Path, "/static/") {
 			referer := r.Referer()
-			socketURL := fmt.Sprintf("http://%s/", shared.WebServerSocket)
+			socketURL := fmt.Sprintf("http://%s/", shared.WebServerBackendSocket)
 
 			if referer == "" || !strings.HasPrefix(referer, socketURL) {
 				http.Error(w, "Unauthorized.", http.StatusUnauthorized)

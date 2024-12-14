@@ -16,7 +16,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("%s\n", err)
 	}
-	socket := shared.WebServerSocket
+	socket := shared.WebServerBackendSocket
 
 	router := mux.NewRouter()
 	// Adding Web router

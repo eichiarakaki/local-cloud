@@ -7,5 +7,6 @@
 
   "downloader-socket": "localhost:3031",
   "message-socket": "localhost:3032",
-  "webserver-socket": "0.0.0.0:3033"
+  "webserver-backend-socket": "0.0.0.0:3033",
+  "webserver-frontend-port": "3034"
 }

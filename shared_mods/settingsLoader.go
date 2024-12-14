@@ -14,7 +14,8 @@ var (
 	MySQLTableName         string
 	DownloaderServerSocket string
 	MessageQueueSocket     string
-	WebServerSocket        string
+	WebServerBackendSocket string
+	WebServerFrontendPort  string
 )
 
 // Must match with the JSON properties.
@@ -25,7 +26,8 @@ type Config struct {
 	MySQLTableName         string `json:"mysql-table-name"`
 	DownloaderServerSocket string `json:"downloader-socket"`
 	MessageQueueSocket     string `json:"message-queue-socket"`
-	WebServerSocket        string `json:"webserver-socket"`
+	WebServerBackendSocket string `json:"webserver-backend-socket"`
+	WebServerFrontendPort  string `json:"webserver-frontend-port"`
 }
 
 // This function should be called only once in each main function of each library that wants to use these global variables.
@@ -55,7 +57,8 @@ func LoadConfig(configFilePath string) error {
 	MySQLTableName = config.MySQLTableName
 	DownloaderServerSocket = config.DownloaderServerSocket
 	MessageQueueSocket = config.MessageQueueSocket
-	WebServerSocket = config.WebServerSocket
+	WebServerBackendSocket = config.WebServerBackendSocket
+	WebServerFrontendPort = config.WebServerFrontendPort
 
 	return nil
 }
