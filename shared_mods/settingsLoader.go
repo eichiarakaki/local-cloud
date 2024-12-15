@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"os"
 )
 
@@ -37,7 +38,12 @@ func LoadConfig(configFilePath string) error {
 	if err != nil {
 		return fmt.Errorf("error while opening the config file: %s", err)
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(file)
 
 	// Reads the file content
 	bytes, err := io.ReadAll(file)

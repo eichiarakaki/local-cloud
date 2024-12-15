@@ -7,16 +7,15 @@ function Layout() {
     <div className={"app"}>
       {/*Navbar*/}
       <nav className="bg-[#141414] w-full h-[60px] flex flex-row items-center px-10 justify-around">
-        <h1
-          className={
-            "hidden sm:block text-white sm:text-[22px] text-[20px] cursor-pointer"
-          }
+        <img
+          src={"/public/home-logo.svg"}
+          alt={"Logo"}
+          className={"hidden sm:block text-white cursor-pointer w-[150px]"}
           onClick={() => {
             window.location.href = "/";
           }}
-        >
-          Local Cloud
-        </h1>
+        />
+
         <input
           type={"text"}
           placeholder={"Search"}

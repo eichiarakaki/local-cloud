@@ -26,10 +26,10 @@ func NewQueue() *QueueList {
 }
 
 func (q *QueueList) Enqueue(URL string) {
-  // Do nothing if the url is empty
-  if strings.TrimSpace(URL) == "" {
-    return
-  }
+	// Do nothing if the url is empty
+	if strings.TrimSpace(URL) == "" {
+		return
+	}
 
 	newNode := &Node{Value: URL}
 	if q.List == nil {
@@ -65,6 +65,26 @@ func (q *QueueList) PrintQueue() {
 
 func (q *QueueList) IsEmpty() bool {
 	return q.List == nil
+}
+
+func (q *QueueList) Position(url string) uint16 {
+	if q.IsEmpty() {
+		return 1
+	}
+
+	// If the Queue is not empty, searches its position
+	auxNode := q.List
+	var c uint16 = 1
+	for auxNode != nil {
+		if auxNode.Value == url {
+			return c
+		}
+		c++
+		auxNode = auxNode.NN
+	}
+
+	// Returns 0 if not found.
+	return 0
 }
 
 // func (q *QueueList) SafeRequest(conn net.Conn) {

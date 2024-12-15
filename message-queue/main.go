@@ -2,10 +2,12 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"message-queue/queue"
+	"message-queue/utils"
 	"net"
 	shared "shared_mods"
 	"time"
@@ -13,6 +15,7 @@ import (
 
 // Global Variable
 var mainQueue = queue.NewQueue()
+var response string
 
 func main() {
 	// Loading config
@@ -50,7 +53,6 @@ func main() {
 	}()
 
 	// A Go-routine to know the Downloader Server status
-	var response string
 	go func() {
 		for {
 			response = <-responseChannel
@@ -127,6 +129,24 @@ func handleConnection(conn net.Conn) {
 			}
 		}
 		log.Printf("[INFO] Got %s from the backend\n", data)
+
+		// Sending response to the backend
+		dataPosition := mainQueue.Position(data)
+		msg := fmt.Sprintf("%s was enqueued successfully.\n", data)
+		toBackend := utils.MQBackendWrapper(response, dataPosition, msg)
+
+		jsonData, err := json.Marshal(toBackend)
+		if err != nil {
+			log.Println("[ERROR]", err)
+			return
+		}
+
+		jsonData = append(jsonData, '\n') // It must have a '\n' at the end because this response will be obtained with a function that reads by lines.
+		_, err = conn.Write(jsonData)
+		if err != nil {
+			log.Println("[ERROR] Couldn't write to the connection:", err)
+			return
+		}
 
 		mainQueue.Enqueue(data)
 		mainQueue.PrintQueue()

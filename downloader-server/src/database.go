@@ -2,6 +2,7 @@ package src
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -17,12 +18,12 @@ func connectDB(dsn string) (*sql.DB, error) {
 
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
-		return nil, fmt.Errorf("Error while opening a connection: %s", err)
+		return nil, fmt.Errorf("error while opening a connection: %s", err)
 	}
 
 	err = db.Ping()
 	if err != nil {
-		return nil, fmt.Errorf("Mysql isn't running: %s", err)
+		return nil, fmt.Errorf("mysql isn't running: %s", err)
 	} else {
 		log.Println("MySQL working propertly.")
 	}
@@ -35,8 +36,8 @@ func checkAndCreateTable(db *sql.DB) error {
 	var table string
 
 	err := db.QueryRow(query).Scan(&table)
-	if err != nil && err != sql.ErrNoRows {
-		return fmt.Errorf("Error verifying the table: %s", err)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return fmt.Errorf("error verifying the table: %s", err)
 	}
 
 	if table == "" {
@@ -50,7 +51,7 @@ func checkAndCreateTable(db *sql.DB) error {
 
 		_, err = db.Exec(newTable)
 		if err != nil {
-			return fmt.Errorf("Couldn't create the table: %v", err)
+			return fmt.Errorf("couldn't create the table: %v", err)
 		}
 		log.Println("Table successfully created")
 	}
@@ -71,7 +72,7 @@ func upload(db *sql.DB, vd *VideoData) error {
 		insertQuery := fmt.Sprintf("INSERT INTO %s (filepath, filename, thumbnail) VALUES(?, ?, ?)", shared.MySQLTableName)
 		_, err := db.Exec(insertQuery, vd.Path, vd.Title, vd.Thumbnail)
 		if err != nil {
-			return fmt.Errorf("Error inserting data: %v", err)
+			return fmt.Errorf("error inserting data: %v", err)
 		}
 	} else {
 		log.Printf("%s already exists in the database.", vd.Path)
@@ -102,7 +103,12 @@ func (vd *VideoData) PushToBD() {
 	if err != nil {
 		vd.safeErr(err)
 	}
-	defer db.Close()
+	defer func(db *sql.DB) {
+		err := db.Close()
+		if err != nil {
+			log.Printf("[ERROR] closing database connection: %s", err)
+		}
+	}(db)
 
 	db.SetMaxOpenConns(1) // Modify when concurrency is set
 	db.SetMaxIdleConns(1)

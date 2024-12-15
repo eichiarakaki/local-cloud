@@ -1,9 +1,5 @@
 package src
 
-/*
-To-Do
-- Handle unexpected errors and send to the frontend
-*/
 import (
 	"fmt"
 	"log"
@@ -16,14 +12,22 @@ import (
 )
 
 func StartDownload(url string, conn net.Conn) {
-	conn.Write([]byte(ServerStatus))
+	_, err := conn.Write([]byte(ServerStatus))
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
 	log.Printf("INFO: Processing %s\n", url)
 
 	Download(url)
 	mu.Lock()
 	ServerStatus = Free // Changes Status to free server
 	mu.Unlock()
-	conn.Write([]byte(ServerStatus)) // Sends the status to the frontend immediately after the download ends
+	_, err = conn.Write([]byte(ServerStatus))
+	if err != nil {
+		log.Println("[ERROR]", err)
+		return
+	} // Sends the status to the frontend immediately after the download ends
 }
 
 /*
@@ -49,7 +53,7 @@ type VideoData struct {
 }
 
 func Download(url string) {
-	cmd := commadBuilder(url)
+	cmd := commandBuilder(url)
 
 	// Executes the command
 	output, err := cmd.CombinedOutput()
@@ -68,7 +72,7 @@ func Download(url string) {
 	videoData.PushToBD()
 }
 
-func commadBuilder(url string) *exec.Cmd {
+func commandBuilder(url string) *exec.Cmd {
 	// To-Do: give the user options to download playlists, and override files
 	outputTemplate := shared.VideoStoragePath + "%(title)s.%(ext)s"
 	return exec.Command("yt-dlp", url, "--no-playlist", "--embed-thumbnail", "--output", outputTemplate)
@@ -165,11 +169,11 @@ func MP4Transformer(inputPath string) (string, error) {
 
 		/*
 		 Options:
-		 ultrafast: Fast but worse file compresion.
-		 faster: Faster than average, but without sacrificing too much quality.
-		 medium: Balance between speed and quality (default in FFmpeg).
-		 slow: Slow, but better file compresion.
-		 veryslow: Very slow, but optimal compresion.
+		 ultrafast: Fast but worse file compression.
+		 Faster: Faster than average, but without sacrificing too much quality.
+		 Medium: Balance between speed and quality (default in FFmpeg).
+		 Slow: Slow, but better file compression.
+		 Veryslow: Very slow, but optimal compression.
 		*/
 		"-preset", "faster",
 
@@ -207,7 +211,6 @@ func MP4Transformer(inputPath string) (string, error) {
 // Creates the thumbnail if it doesn't exist, and only returns the full path to the thumbnail if exists.
 func extractThumbnail(fullpath string, filename string) (string, error) {
 	thumbnailTmpl := fmt.Sprintf("%s%s_thumbnail.webp", shared.VideoStoragePath, filename)
-	// fmt.Printf("the thumbnail: %s\nthe fullpath: %s\n", thumbnailTmpl, fullpath)
 	if _, err := os.Stat(thumbnailTmpl); os.IsNotExist(err) { // If thumbnailTmpl does NOT exists.
 		cmd := exec.Command("ffmpeg", "-dump_attachment:t:0", thumbnailTmpl, "-i", fullpath, "-vn", "-f", "null", "-")
 		// Executes the command

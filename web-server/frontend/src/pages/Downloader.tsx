@@ -1,12 +1,19 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 interface ResponseData {
+  server_status: string;
+  queue_position: string;
   message: string;
 }
 
 function Downloader() {
   const [inputValue, setInputValue] = useState<string>("");
   const [data, setData] = useState<ResponseData | undefined>();
+
+  // Changing the page title
+  useEffect(() => {
+    document.title = "Local Cloud | Downloader";
+  }, []);
 
   const handleKeyDown = async (
     event: React.KeyboardEvent<HTMLInputElement>,
@@ -27,8 +34,10 @@ function Downloader() {
         if (!response.ok) {
           console.error("Error in POST request:", response);
         } else {
-          const data = await response.json();
-          setData(data);
+          const rawData = await response.json();
+          const parsedData: ResponseData = JSON.parse(rawData);
+
+          setData(parsedData);
         }
 
         setInputValue("");
@@ -39,8 +48,8 @@ function Downloader() {
   };
 
   return (
-    <div className={"flex flex-col mt-[200px] items-center text-center mx-5"}>
-      <h1 className={"text-3xl mb-10 select-none"}>
+    <div className={"flex flex-col mt-[200px] items-center mx-5"}>
+      <h1 className={"text-3xl mb-10 select-none text-center"}>
         Paste an URL from <span className={"text-red-600"}>YouTube</span>.
       </h1>
 
@@ -58,11 +67,26 @@ function Downloader() {
           " duration-100"
         }
       />
-      <div className={"mt-10"}>
+      <div
+        className={
+          "mt-10 border min-w-[200px] max-w-[600px] w-full min-h-[300px] max-h-[500px] rounded-md" +
+          " border-[#202020] flex flex-col p-5 font-['Geist'] overflow-auto"
+        }
+      >
         {data ? (
-          <span className={"text-green-600"}>{data.message}</span>
+          <>
+            <div className={""}>
+              <span>Server Status: {data.server_status}</span>
+            </div>
+            <div className={""}>
+              <span>Queue Position: {data.queue_position}</span>
+            </div>
+            <div className={""}>
+              <span>Server Message: {data.message}</span>
+            </div>
+          </>
         ) : (
-          "Waiting for input..."
+          <span className={""}>Waiting for input...</span>
         )}
       </div>
     </div>

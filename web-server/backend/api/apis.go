@@ -1,10 +1,12 @@
 package api
 
 import (
+	"bufio"
 	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"net/http"
@@ -26,7 +28,7 @@ type VideoData struct {
 	CreatedAt string `json:"created_at"`
 }
 
-// Processes and returns the relative file paths, thumbnails and titles stored in videos-storage.
+// GetAllVideos Processes and returns the relative file paths, thumbnails and titles stored in videos-storage.
 func GetAllVideos(w http.ResponseWriter, r *http.Request) {
 	db, err := src.ConnectDB()
 	if err != nil {
@@ -194,6 +196,7 @@ func ServeStorage(w http.ResponseWriter, r *http.Request) {
 
 // SendToDownloaderServer Handles the request from the frontend and sends to the message queue socket.
 func SendToDownloaderServer(w http.ResponseWriter, r *http.Request) {
+	log.Println("[INFO] Got a request to '/api/SendToDownloaderServer/'")
 	// Configuring the CORS headers
 	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3034")
 	w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
@@ -229,20 +232,20 @@ func SendToDownloaderServer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Sending the data to the message queue
-	if err := sendToSocket(shared.MessageQueueSocket, requestBody.URL); err != nil {
+	res, err := sendToSocket(shared.MessageQueueSocket, requestBody.URL)
+	if err != nil {
 		log.Println("[ERROR] Sending message to server:", err)
 		http.Error(w, "Failed to send message to server:", http.StatusInternalServerError)
 		return
 	}
+	fmt.Println("[BACKEND] Got", res)
 
 	// Response to the frontend
 	w.WriteHeader(http.StatusOK)
-	response := map[string]string{"message": "URL received successfully."}
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(response); err != nil {
+	if err := json.NewEncoder(w).Encode(res); err != nil {
 		http.Error(w, "Error encoding JSON", http.StatusInternalServerError)
 	}
-
 }
 
 func Testing(w http.ResponseWriter, r *http.Request) {
@@ -257,10 +260,10 @@ func Testing(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func sendToSocket(address string, message string) error {
+func sendToSocket(address string, message string) (string, error) {
 	conn, err := net.Dial("tcp", address)
 	if err != nil {
-		return fmt.Errorf("[ERROR] Failed to connect to socket: %w", err)
+		return "", fmt.Errorf("[ERROR] Failed to connect to socket: %w", err)
 	}
 	defer func(conn net.Conn) {
 		err := conn.Close()
@@ -271,8 +274,17 @@ func sendToSocket(address string, message string) error {
 
 	_, err = conn.Write([]byte(message))
 	if err != nil {
-		return fmt.Errorf("[ERROR] Failed to send to socket: %w", err)
+		return "", fmt.Errorf("[ERROR] Failed to send to socket: %w", err)
 	}
 
-	return nil
+	// Reads response from the message queue for sending to the frontend.
+	response, err := bufio.NewReader(conn).ReadString('\n')
+	if err != nil {
+		if err == io.EOF {
+			return "", nil
+		}
+		return "", fmt.Errorf("error when reading from the server: %s", err)
+	}
+
+	return response, nil
 }

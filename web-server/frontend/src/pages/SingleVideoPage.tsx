@@ -1,4 +1,5 @@
 import { useLocation } from "react-router-dom";
+import { useEffect } from "react";
 
 function VideoPage() {
   const location = useLocation();
@@ -8,6 +9,10 @@ function VideoPage() {
   const title = queryParams.get("title");
   const createdAt = queryParams.get("created_at");
   const embeddedVideo = queryParams.get("embedded_video");
+
+  useEffect(() => {
+    document.title = title ? title : "Local Cloud";
+  }, [title]);
 
   return (
     <div
