@@ -5,6 +5,7 @@ import VideoPage from "./pages/SingleVideoPage.tsx";
 import Layout from "./Layout.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Downloader from "./pages/Downloader.tsx";
+import Browser from "./elements/Browser.tsx";
 
 function App() {
   return (
@@ -15,6 +16,8 @@ function App() {
           <Route index element={<Home />}></Route>
           {/* Single Video Page */}
           <Route path={"/video/:videoData"} element={<VideoPage />}></Route>
+          {/*Video Browser*/}
+          <Route path={"/browser"} element={<Browser />}></Route>
         </Route>
 
         {/*Downloader Page*/}

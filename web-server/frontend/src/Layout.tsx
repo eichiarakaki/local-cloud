@@ -1,8 +1,11 @@
 import { Outlet } from "react-router-dom";
 import { faDownload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useState } from "react";
 
 function Layout() {
+  const [inputValue, setInputValue] = useState("");
+
   return (
     <div className={"app"}>
       {/*Navbar*/}
@@ -19,6 +22,13 @@ function Layout() {
         <input
           type={"text"}
           placeholder={"Search"}
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              window.location.href = `/browser/?word=${inputValue}`;
+            }
+          }}
+          value={inputValue}
           className={
             "px-5 py-2 rounded-lg border border-[#101010] hover:border-zinc-700 duration-100 outline-none" +
             " min-w-[100px] w-[350px]"

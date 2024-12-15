@@ -9,7 +9,7 @@ interface Video {
 }
 
 function Home() {
-  const [videos, setVideos] = useState<Video[]>([]); // Almacenamos los videos
+  const [videos, setVideos] = useState<Video[]>([]);
 
   useEffect(() => {
     // Changing the page title.
