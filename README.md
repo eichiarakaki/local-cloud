@@ -1,13 +1,13 @@
 # Local Cloud
-
 **Local Cloud** is a microservice-based system designed to allow users within the same **Local Area Network (LAN)** to download videos via shared URLs and view them through a locally hosted web application. 
--
+---
 > The system efficiently handles video downloads, stores the data, and renders them on a user-friendly front-end.
 
 
 ## Quick Start
 > Local host is easy to configure, you can configure ports, sockets and folder in `config.json`.
-- Dependencias
+- Do not forget to specify the directory where you want the downloaded videos to be stored.
+- Dependencies
   - `MySQL` running on the port specified in `config.json`.
     - Make sure to create a database with the same name you put in `config.json`.
     - **Do not create the TABLE**, as it is automatically created by the Downloader Server.
