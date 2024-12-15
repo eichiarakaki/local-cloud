@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"message-queue/queue"
 	"message-queue/utils"
 	"net"
 	shared "shared_mods"
@@ -14,8 +13,8 @@ import (
 )
 
 // Global Variable
-var mainQueue = queue.NewQueue()
-var response string
+var mainQueue = NewQueue()
+var Response string
 
 func main() {
 	// Loading config
@@ -55,8 +54,8 @@ func main() {
 	// A Go-routine to know the Downloader Server status
 	go func() {
 		for {
-			response = <-responseChannel
-			log.Println("[INFO] New response from the Downloader Server:", response)
+			Response = <-responseChannel
+			log.Println("[INFO] New response from the Downloader Server:", Response)
 		}
 	}()
 
@@ -64,7 +63,7 @@ func main() {
 	var prevResponse string
 	go func() {
 		for {
-			if response == "free\n" && !mainQueue.IsEmpty() { // If Downloader Server is free and the queue isn't empty
+			if Response == "free\n" && !mainQueue.IsEmpty() { // If Downloader Server is free and the queue isn't empty
 				url := mainQueue.Dequeue()
 				if url != "" {
 					_, err = fmt.Fprintf(conn, "lock %s\n", url) // Sends the next URL to the downloader server
@@ -76,11 +75,11 @@ func main() {
 				log.Println("[INFO] Sent to the downloader server.")
 			}
 
-			if response == "busy\n" && prevResponse != "busy\n" {
+			if Response == "busy\n" && prevResponse != "busy\n" {
 				log.Println("[INFO] Downloader Server is busy.")
 			}
 
-			prevResponse = response
+			prevResponse = Response
 			time.Sleep(time.Second * 2)
 		}
 
@@ -131,9 +130,9 @@ func handleConnection(conn net.Conn) {
 		log.Printf("[INFO] Got %s from the backend\n", data)
 
 		// Sending response to the backend
-		dataPosition := mainQueue.Position(data)
+		dataPosition := mainQueue.Length()
 		msg := fmt.Sprintf("%s was enqueued successfully.\n", data)
-		toBackend := utils.MQBackendWrapper(response, dataPosition, msg)
+		toBackend := utils.MQBackendWrapper(Response, dataPosition+1, msg)
 
 		jsonData, err := json.Marshal(toBackend)
 		if err != nil {
