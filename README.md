@@ -1,6 +1,7 @@
 # Local Cloud
-**Local Cloud** is a microservice-based system designed to allow users within the same **Local Area Network (LAN)** to download videos via shared URLs and view them through a locally hosted web application. 
----
+
+**Local Cloud** is a microservice-based system designed to allow users within the same **Local Area Network (LAN)** to download videos via shared URLs and watch them through a locally hosted web application. 
+
 > The system efficiently handles video downloads, stores the data, and renders them on a user-friendly front-end.
 
 
