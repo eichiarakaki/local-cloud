@@ -6,7 +6,7 @@
 
 pkgs.mkShell {
   buildInputs = with pkgs; [
-      nodejs
+      bun
   ];
 
   name = "frontend-env";

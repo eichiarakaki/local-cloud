@@ -75,7 +75,14 @@ func Download(url string) {
 func commandBuilder(url string) *exec.Cmd {
 	// To-Do: give the user options to download playlists, and override files
 	outputTemplate := shared.VideoStoragePath + "%(title)s.%(ext)s"
-	return exec.Command("yt-dlp", url, "--no-playlist", "--embed-thumbnail", "--output", outputTemplate)
+	return exec.Command(
+		"yt-dlp",
+		url,
+		"--no-playlist",
+		"--embed-thumbnail",
+		"-f", "bestvideo[height<=1080]+bestaudio/best[height<=1080]",
+		"--output", outputTemplate,
+	)
 }
 
 func dbWrapper(output []byte) (*VideoData, error) {
