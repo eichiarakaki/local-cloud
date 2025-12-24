@@ -1,27 +1,32 @@
-{ pkgs ? import <nixpkgs> {} }:
+{
+  description = "LocalCloud dev shell";
 
-let
-  mysql = pkgs.mariadb;
-in
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+  };
 
-pkgs.mkShell {
-  buildInputs = [
-    pkgs.bun
-    pkgs.ffmpeg
-    mysql
-    pkgs.go
-  ];
+  outputs = { self, nixpkgs }:
+  let
+    system = "x86_64-linux";
+    pkgs = import nixpkgs { inherit system; };
+    mysql = pkgs.mariadb;
+  in {
+    devShells.${system}.default = pkgs.mkShell {
+      buildInputs = [
+        pkgs.bun
+        pkgs.ffmpeg
+        mysql
+        pkgs.go
+      ];
 
-  shellHook = ''
-    # Verificar si estamos en el entorno de desarrollo y activar MySQL
-    if [ -z "$NIX_BUILD_TOP" ]; then
-      echo "Activando MySQL solo en desarrollo"
-      # Comando para iniciar MySQL si no está en ejecución
-      if ! pgrep mysqld > /dev/null; then
-        echo "Iniciando MySQL..."
-        # Comando para iniciar el servicio MySQL
-        mysql.server start
-      fi
-    fi
-  '';
+      shellHook = ''
+        echo "Dev shell activated"
+
+        if ! pgrep mysqld > /dev/null; then
+          echo "Starting MariaDB..."
+          mysql.server start
+        fi
+      '';
+    };
+  };
 }
