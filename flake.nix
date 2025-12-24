@@ -9,8 +9,7 @@ pkgs.mkShell {
     pkgs.bun
     pkgs.ffmpeg
     mysql
-    go
-    
+    pkgs.go
   ];
 
   shellHook = ''
