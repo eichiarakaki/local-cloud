@@ -2,6 +2,7 @@ import { Outlet } from "react-router-dom";
 import { faDownload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
+import Footer from "./components/Footer";
 
 function Layout() {
   const [inputValue, setInputValue] = useState("");
@@ -66,7 +67,7 @@ function Layout() {
       </main>
 
       {/*Footer*/}
-      {/*<footer className={"bg-zinc-950 text-white p-10 flex justify-center"}>Footer</footer>*/}
+      <Footer />
     </div>
   );
 }

@@ -41,17 +41,13 @@ function Downloader() {
         setError("Server returned an error");
       } else {
         try {
-          // Primero obtenemos el objeto JSON inicial
           const rawData = await response.json();
 
-          // Si rawData es un string, lo parseamos nuevamente
           let parsedData: ResponseData;
 
           if (typeof rawData === 'string') {
-            // Caso 1: El servidor devuelve un string JSON
             parsedData = JSON.parse(rawData);
           } else if (typeof rawData === 'object' && rawData !== null) {
-            // Caso 2: El servidor devuelve un objeto JSON
             parsedData = rawData as ResponseData;
           } else {
             throw new Error("Unexpected response format");
@@ -59,7 +55,6 @@ function Downloader() {
 
           console.log("Final parsed data:", parsedData);
 
-          // Limpiar los datos de caracteres no deseados
           const cleanedData: ResponseData = {
             server_status: parsedData.server_status,
             queue_position: parsedData.queue_position,
@@ -88,13 +83,13 @@ function Downloader() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#141e30] to-[#142b45] flex flex-col items-center p-5">
+    <div className="h-screen bg-[#181818] flex flex-col items-center p-5">
       <h1 className="text-4xl font-bold text-white mt-10 mb-4 text-center drop-shadow-lg">
         Local Cloud Downloader
       </h1>
       <p className="text-lg text-gray-300 mb-10 text-center">
         Paste a URL from{" "}
-        <span className="text-[#d4af37] font-semibold">YouTube</span> and submit.
+        <span className="text-[#d72c2c] font-semibold">YouTube</span> and submit.
       </p>
       <div className="w-full max-w-md">
         <div className="flex flex-col gap-4">
@@ -104,19 +99,19 @@ function Downloader() {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="px-4 py-3 rounded-md bg-gray-800 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-[#d4af37] text-white placeholder-gray-400"
+            className="px-4 py-3 rounded-md bg-zinc-800 border border-gray-600 focus:outline-none focus:ring-1 focus:ring-[#b6b6b6] text-white placeholder-gray-400"
             disabled={isLoading}
           />
           <button
             onClick={sendUrl}
             disabled={isLoading || inputValue.trim() === ""}
-            className="px-4 py-3 rounded-md bg-[#d4af37] text-black font-semibold hover:bg-[#e0b05c] transition-colors duration-150 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-3 rounded-md bg-[#777777] text-black font-semibold hover:bg-[#eeeeee] transition-colors duration-150 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? "Processing..." : "Submit"}
           </button>
         </div>
 
-        <div className="mt-8 p-6 bg-gray-900 bg-opacity-70 rounded-md shadow-lg border border-gray-700 overflow-auto max-h-64">
+        <div className="mt-8 p-6 bg-zinc-900 bg-opacity-70 rounded-md shadow-lg border border-gray-700 overflow-auto max-h-64">
           {isLoading ? (
             <p className="text-gray-200">Processing request...</p>
           ) : error ? (
@@ -128,15 +123,15 @@ function Downloader() {
             <div className="text-gray-200 space-y-3">
               <div>
                 <span className="font-semibold">Server Status:</span>{" "}
-                <span className="text-[#d4af37]">{data.server_status}</span>
+                <span className="text-[#dddddd]">{data.server_status}</span>
               </div>
               <div>
                 <span className="font-semibold">Queue Position:</span>{" "}
-                <span className="text-[#d4af37]">{data.queue_position}</span>
+                <span className="text-[#dddddd]">{data.queue_position}</span>
               </div>
               <div>
                 <span className="font-semibold">Server Message:</span>{" "}
-                <span className="text-[#d4af37]">{data.message}</span>
+                <span className="text-[#dddddd]">{data.message}</span>
               </div>
             </div>
           ) : (

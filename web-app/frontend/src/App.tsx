@@ -18,10 +18,9 @@ function App() {
           <Route path={"/video/:videoData"} element={<VideoPage />}></Route>
           {/*Video Browser*/}
           <Route path={"/browser"} element={<Browser />}></Route>
+          {/*Downloader Page*/}
+          <Route path={"/download"} element={<Downloader />} />
         </Route>
-
-        {/*Downloader Page*/}
-        <Route path={"/download"} element={<Downloader />} />
         {/*Managing 404 requests*/}
         <Route path={""} element={<NotFound />} />
       </Routes>

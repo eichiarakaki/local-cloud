@@ -17,6 +17,8 @@
   - `ffmpeg` for the Downloader Server: You can install it with your package manager.
   - `nodejs` for the Front-End: You can install it with your package manager.
 - Once you have those dependencies on your system, run `go run .` inside each of these directories in order: downloader-server/ -> message-queue/ -> web-app/backend/ and finally, inside the web-server/frotend/ folder install the dependencies with npm install and then run the frontend.
+
+> Make sure /web-app/frontend/.env is the same as the protect-root/config.json: webserver-backend-socket
 ## Previews
 Home Page
 ![image](https://github.com/user-attachments/assets/fb5f8b1b-9f6c-4259-a6fd-5f55178f1573)

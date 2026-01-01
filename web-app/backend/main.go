@@ -10,6 +10,7 @@ import (
 	"github.com/eichiarakaki/local-cloud/web-server/backend/api"
 	"github.com/eichiarakaki/local-cloud/web-server/backend/utils"
 	"github.com/gorilla/mux"
+	// "github.com/eichiarakaki/local-cloud/web-server/backend/middleware"
 )
 
 func main() {
@@ -27,7 +28,7 @@ func main() {
 	// printing all routes
 	utils.PrintRoutes(router)
 
-	// Adding Middleware - Better do this with a proxy.
+	// Adding Middleware
 	// router.Use(middleware.APIFilter)
 
 	server := &http.Server{
