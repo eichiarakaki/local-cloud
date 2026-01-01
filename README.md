@@ -10,12 +10,13 @@
 - Do not forget to specify the directory where you want the downloaded videos to be stored.
 - Dependencies
   - `MySQL` running on the port specified in `config.json`.
+    - Make sure to create a user within the MySQL and same password as the one in `config.json`. 
     - Make sure to create a database with the same name you put in `config.json`.
     - **Do not create the TABLE**, as it is automatically created by the Downloader Server.
   - `yt-dlp` for the Downloader Server: You can install it with `pip install yt-dlp`.
   - `ffmpeg` for the Downloader Server: You can install it with your package manager.
   - `nodejs` for the Front-End: You can install it with your package manager.
-- Once you have those dependencies on your system, run `go run .` inside each of these directories in order: downloader-server/ -> message-queue/ -> web-server/backend/ and finally, inside the web-server/frotend/ folder install the dependencies with npm install and then run your server.
+- Once you have those dependencies on your system, run `go run .` inside each of these directories in order: downloader-server/ -> message-queue/ -> web-app/backend/ and finally, inside the web-server/frotend/ folder install the dependencies with npm install and then run the frontend.
 ## Previews
 Home Page
 ![image](https://github.com/user-attachments/assets/fb5f8b1b-9f6c-4259-a6fd-5f55178f1573)

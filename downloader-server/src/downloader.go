@@ -194,7 +194,8 @@ func MP4Transformer(inputPath string) (string, error) {
 		// 320k (max audio quality).
 		"-b:a", "192k", // Audio bitrate similar to the original
 
-		"-strict", "experimental", // AAC support
+		"-movflags", "+faststart", // Move moov atom to beginning for web streaming
+
 		outputPath,
 	)
 

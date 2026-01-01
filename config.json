@@ -1,6 +1,6 @@
 {
-  "video-storage-path": "/home/eichi/Projects/local-cloud/videos-storage/",
-  "mysql-conn": "root:0101@tcp(127.0.0.1:3306)",
+  "video-storage-path": "/home/eichi/Programming/projects/LocalCloud/videos/",
+  "mysql-conn": "admin:0101@tcp(127.0.0.1:3306)",
   "mysql-db-name": "localcloud",
   "mysql-table-name": "localcloud",
   "downloader-socket": "localhost:3031",

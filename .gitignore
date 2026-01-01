@@ -1,4 +1,5 @@
-videos-storage/*
 .idea
 /dist
 interview-questions.md
+.mysql
+/videos/*
