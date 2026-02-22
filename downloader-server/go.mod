@@ -1,6 +1,6 @@
 module downloader-server
 
-go 1.22.7
+go 1.26.0
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect

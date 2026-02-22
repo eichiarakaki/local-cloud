@@ -33,7 +33,7 @@ function Downloader() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ url: inputValue + "\n" }),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -45,9 +45,9 @@ function Downloader() {
 
           let parsedData: ResponseData;
 
-          if (typeof rawData === 'string') {
+          if (typeof rawData === "string") {
             parsedData = JSON.parse(rawData);
-          } else if (typeof rawData === 'object' && rawData !== null) {
+          } else if (typeof rawData === "object" && rawData !== null) {
             parsedData = rawData as ResponseData;
           } else {
             throw new Error("Unexpected response format");
@@ -58,7 +58,7 @@ function Downloader() {
           const cleanedData: ResponseData = {
             server_status: parsedData.server_status,
             queue_position: parsedData.queue_position,
-            message: parsedData.message
+            message: parsedData.message,
           };
 
           setData(cleanedData);
@@ -89,7 +89,8 @@ function Downloader() {
       </h1>
       <p className="text-lg text-gray-300 mb-10 text-center">
         Paste a URL from{" "}
-        <span className="text-[#d72c2c] font-semibold">YouTube</span> and submit.
+        <span className="text-[#d72c2c] font-semibold">YouTube</span> and
+        submit.
       </p>
       <div className="w-full max-w-md">
         <div className="flex flex-col gap-4">
@@ -117,7 +118,9 @@ function Downloader() {
           ) : error ? (
             <div>
               <p className="text-yellow-400">{error}</p>
-              <p className="text-gray-400 mt-2 text-sm">Check the console for more details.</p>
+              <p className="text-gray-400 mt-2 text-sm">
+                Check the console for more details.
+              </p>
             </div>
           ) : data ? (
             <div className="text-gray-200 space-y-3">

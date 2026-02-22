@@ -1,3 +1,3 @@
 module shared_mods
 
-go 1.22.7
+go 1.26.0

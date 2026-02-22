@@ -1,0 +1,26 @@
+services:
+  web-frontend:
+    build:
+      context: ./web-app/frontend/
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3034:3034"
+    volumes:
+      - ./web-app/frontend:/web-app/frontend
+      - /web-app/frontend/node_modules
+    environment:
+      - NODE_ENV=development
+    depends_on:
+      - web-backend
+    working_dir: /web-app/frontend
+
+  web-backend:
+    build:
+      context: .
+      dockerfile: web-app/backend/Dockerfile.dev
+    ports:
+      - "3033:3033"
+    volumes:
+      - ./web-app/backend:/web-app/backend
+    working_dir: /web-app/web-app/backend
+    command: go run .
