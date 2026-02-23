@@ -1,4 +1,15 @@
 services:
+  downloader-server:
+    build:
+      context: .
+      dockerfile: downloader-server/Dockerfile.dev
+    ports:
+      - "3031:3031"
+    volumes:
+      - .:/workspace
+    working_dir: /workspace/downloader-server
+    command: go run .
+
   web-frontend:
     build:
       context: ./web-app/frontend/
@@ -23,4 +34,17 @@ services:
     volumes:
       - ./web-app/backend:/web-app/backend
     working_dir: /web-app/web-app/backend
+    command: go run .
+
+  message-queue:
+    build:
+      context: .
+      dockerfile: message-queue/Dockerfile.dev
+    ports:
+      - "3032:3032"
+    volumes:
+      - .:/workspace
+    working_dir: /workspace/message-queue
+    depends_on:
+      - downloader-server
     command: go run .

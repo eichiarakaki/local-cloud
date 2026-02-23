@@ -3,8 +3,8 @@
   "mysql-conn": "admin:0101@tcp(127.0.0.1:3306)",
   "mysql-db-name": "localcloud",
   "mysql-table-name": "localcloud",
-  "downloader-socket": "localhost:3031",
-  "message-queue-socket": "localhost:3032",
+  "downloader-socket": "downloader-server:3031",
+  "message-queue-socket": "0.0.0.0:3032",
   "webserver-backend-socket": "0.0.0.0:3033",
   "webserver-frontend-port": "3034"
 }

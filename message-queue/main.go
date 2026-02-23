@@ -26,9 +26,16 @@ func main() {
 	downloaderServerSocket := shared.DownloaderServerSocket
 
 	// Initializing connection to the Downloader server.
-	conn, err := net.Dial("tcp", downloaderServerSocket)
-	if err != nil {
-		log.Println("[ERROR] Couldn't connect to the downloader server:", err)
+	var conn net.Conn
+	for {
+		conn, err = net.Dial("tcp", downloaderServerSocket)
+		if err != nil {
+			log.Println("[ERROR] Couldn't connect to the downloader server:", err)
+			time.Sleep(7 * time.Second) // Wait for 7 seconds before retrying
+			continue
+		}
+		log.Println("[INFO] Connected to the downloader server.")
+		break
 	}
 	defer func(conn net.Conn) {
 		err := conn.Close()

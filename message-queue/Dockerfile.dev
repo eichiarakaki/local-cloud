@@ -1,0 +1,12 @@
+FROM golang:1.26.0
+
+WORKDIR /workspace
+
+COPY . .
+
+RUN go work sync
+
+WORKDIR /workspace/message-queue
+
+EXPOSE 3032
+CMD ["go", "run", "."]
