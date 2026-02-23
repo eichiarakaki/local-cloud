@@ -7,6 +7,7 @@ services:
       - "3031:3031"
     volumes:
       - .:/workspace
+      - ./videos:/videos # Mount the videos directory to persist downloaded videos
     working_dir: /workspace/downloader-server
     command: go run .
 
@@ -32,8 +33,9 @@ services:
     ports:
       - "3033:3033"
     volumes:
-      - ./web-app/backend:/web-app/backend
-    working_dir: /web-app/web-app/backend
+      - .:/workspace
+      - ./videos:/videos # Mount the videos directory to persist downloaded videos
+    working_dir: /workspace/web-app/backend
     command: go run .
 
   message-queue:
@@ -48,3 +50,21 @@ services:
     depends_on:
       - downloader-server
     command: go run .
+
+  mysql:
+    image: mysql:9.6.0
+    container_name: mysql-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 1010
+      MYSQL_DATABASE: localcloud
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: 1010
+    # ports:
+    #   - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d
+
+volumes:
+  mysql_data:

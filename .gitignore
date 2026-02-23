@@ -1,6 +1,6 @@
 .idea
 /dist
 interview-questions.md
-.mysql
+mysql/
 /videos/*
 vendor/

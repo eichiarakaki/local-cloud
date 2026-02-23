@@ -1,10 +1,10 @@
 {
-  "video-storage-path": "/home/eichi/Programming/projects/LocalCloud/videos/",
-  "mysql-conn": "admin:0101@tcp(127.0.0.1:3306)",
+  "video-storage-path": "/videos/",
+  "mysql-conn": "admin:1010@tcp(mysql:3306)",
   "mysql-db-name": "localcloud",
   "mysql-table-name": "localcloud",
   "downloader-socket": "downloader-server:3031",
-  "message-queue-socket": "0.0.0.0:3032",
-  "webserver-backend-socket": "0.0.0.0:3033",
+  "message-queue-socket": "message-queue:3032",
+  "webserver-backend-socket": "web-backend:3033",
   "webserver-frontend-port": "3034"
 }

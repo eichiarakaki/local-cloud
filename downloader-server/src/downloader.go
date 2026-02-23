@@ -138,7 +138,11 @@ func extractTitleAndPath(output []byte) (string, string, bool, error) {
 				fileName := filterVideoTitle(fullPath)
 
 				return fullPath, fileName, false, nil
+			} else {
+				fmt.Printf("WARNING: Unexpected format in line: %s\n", line)
 			}
+		} else {
+			fmt.Printf("WARNING: Line does not contain expected patterns: %s\n", line)
 		}
 	}
 	return "", "", false, fmt.Errorf("Error extracting title and path.")

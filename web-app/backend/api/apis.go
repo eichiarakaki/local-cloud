@@ -15,6 +15,7 @@ import (
 	"path/filepath"
 	shared "shared_mods"
 	"strings"
+	"time"
 
 	"github.com/eichiarakaki/local-cloud/web-server/backend/src"
 	"github.com/gorilla/mux"
@@ -243,9 +244,9 @@ func SendToDownloaderServer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Sending the data to the message queue
-	res, err := sendToSocket(shared.MessageQueueSocket, requestBody.URL)
+	res, err := sendToMQ(shared.MessageQueueSocket, requestBody.URL)
 	if err != nil {
-		log.Println("[ERROR] Sending message to server:", err)
+		log.Println("[ERROR] Sending message to server:", err, "\n")
 		http.Error(w, "Failed to send message to server:", http.StatusInternalServerError)
 		return
 	}
@@ -271,11 +272,22 @@ func Testing(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func sendToSocket(address string, message string) (string, error) {
-	conn, err := net.Dial("tcp", address)
-	if err != nil {
-		return "", fmt.Errorf("[ERROR] Failed to connect to socket: %w", err)
+func sendToMQ(address string, message string) (string, error) {
+	var conn net.Conn
+	var err error
+	for i := 0; i < 5; i++ { // Tries to connect to the socket for 5 times before giving up, in case the message queue server is not ready yet.
+		conn, err = net.Dial("tcp", address)
+		if err == nil {
+			fmt.Printf("[INFO] Connected to message queue at %s\n", address)
+			break
+		}
+		log.Printf("[ERROR] Failed to connect to socket (attempt %d/5): %v\n", i+1, err)
+		time.Sleep(5 * time.Second) // Waits for 5 seconds before retrying
 	}
+	if conn == nil {
+		return "", fmt.Errorf("[ERROR] Failed to connect to socket after 5 attempts")
+	}
+
 	defer func(conn net.Conn) {
 		err := conn.Close()
 		if err != nil {

@@ -1,19 +1,12 @@
 FROM golang:1.26.0
 
-WORKDIR /web-app
-
-COPY go.work ./
-
-COPY shared_mods/go.mod ./shared_mods/go.mod
-COPY web-app/backend/go.mod ./web-app/backend/go.mod
-COPY downloader-server/go.mod ./downloader-server/go.mod
-COPY message-queue/go.mod ./message-queue/go.mod
-
-RUN go work sync
+WORKDIR /workspace
 
 COPY . .
 
-WORKDIR /web-app/web-app/backend
+RUN go work sync
+
+WORKDIR /workspace/backend
 
 EXPOSE 3033
 CMD ["go", "run", "."]
