@@ -99,6 +99,40 @@ Local Cloud is a LAN-first microservice system for submitting video URLs, downlo
 - CORS restricts origin to configured frontend (currently `http://localhost:3034`) (`web-server/backend/api/apis.go:201`).
 - URL validation limited to YouTube domains (`downloader-server/src/urlFilter.go:8-22`).
 
+## Development Setup
+
+### Docker Compose (Recommended)
+The project uses `docker-compose-dev.yml` for full local development with containerized services:
+
+**Prerequisites**:
+- Docker and Docker Compose installed
+- `config.json` configured in the project root with appropriate paths and socket addresses
+
+**Services**:
+- **web-frontend**: React + Vite dev server on port `3034`
+- **web-backend**: Go REST API on port `3033` with live reload via `go run`
+- **message-queue**: Go TCP broker on port `3032`
+- **downloader-server**: Go TCP server on port `3031` with `yt-dlp` and `ffmpeg`
+- **mysql**: MySQL 9.6.0 database with persistent volume
+
+**Build Context**: Repository root (`.`); services build with mounted workspaces using `go.work` for local module resolution.
+
+**Run**:
+```bash
+docker-compose -f docker-compose-dev.yml up --build
+```
+
+Data persists in the `mysql_data` volume and `./videos` directory.
+
+### Local Development (Nix / Manual)
+Alternatively, use the provided `flake.nix` for a Nix dev shell or manually install:
+- Go 1.26.0+
+- Node.js + npm/bun
+- MySQL 9.6.0+
+- `yt-dlp` and `ffmpeg`
+
+Then run services individually from their respective directories using `go run .` or `npm run dev`.
+
 ## Deployment and Operations
 - Dependencies: MySQL, `yt-dlp`, `ffmpeg`, Node.js (`README.md:11-18`).
 - Startup order: Downloader → Message Queue → Web Server Backend → Frontend (`README.md:18`).

@@ -6,19 +6,69 @@
 
 
 ## Quick Start
-> Local host is easy to configure, you can configure ports, sockets and folder in `config.json`.
-- Do not forget to specify the directory where you want the downloaded videos to be stored.
-- Dependencies
-  - `MySQL` running on the port specified in `config.json`.
-    - Make sure to create a user within the MySQL and same password as the one in `config.json`. 
-    - Make sure to create a database with the same name you put in `config.json`.
-    - **Do not create the TABLE**, as it is automatically created by the Downloader Server.
-  - `yt-dlp` for the Downloader Server: You can install it with `pip install yt-dlp`.
-  - `ffmpeg` for the Downloader Server: You can install it with your package manager.
-  - `nodejs` for the Front-End: You can install it with your package manager.
-- Once you have those dependencies on your system, run `go run .` inside each of these directories in order: downloader-server/ -> message-queue/ -> web-app/backend/ and finally, inside the web-server/frotend/ folder install the dependencies with npm install and then run the frontend.
 
-> Make sure /web-app/frontend/.env is the same as the protect-root/config.json: webserver-backend-socket
+### Using Docker Compose (Recommended)
+
+1. **Clone and configure**:
+   ```bash
+   git clone <repo>
+   cd LocalCloud
+   ```
+
+2. **Ensure `config.json` is set up** with Docker service names as hostnames (see `config.json` example below).
+
+3. **Start all services**:
+   ```bash
+   docker-compose -f docker-compose-dev.yml up --build
+   ```
+
+4. **Access the application**:
+   - Frontend: `http://localhost:3034`
+   - Backend API: `http://localhost:3033/api`
+   - MySQL will be ready after initial setup
+
+**Example `config.json` for Docker**:
+```json
+{
+  "video-storage-path": "/videos/",
+  "mysql-conn": "admin:1010@tcp(mysql:3306)",
+  "mysql-db-name": "localcloud",
+  "mysql-table-name": "localcloud",
+  "downloader-socket": "downloader-server:3031",
+  "message-queue-socket": "message-queue:3032",
+  "webserver-backend-socket": "web-backend:3033",
+  "webserver-frontend-port": "3034"
+}
+```
+
+### Manual Setup (Local Development)
+
+If you prefer not to use Docker, you can run services locally:
+
+**Dependencies**:
+- Go 1.26.0+
+- Node.js + npm or bun
+- MySQL 9.6.0+
+- `yt-dlp`: `pip install yt-dlp`
+- `ffmpeg`: Install via your package manager
+
+**Alternatively, use Nix**:
+```bash
+nix flake develop
+```
+
+**Then run each service** (in separate terminals):
+```bash
+cd downloader-server && go run .
+cd message-queue && go run .
+cd web-app/backend && go run .
+cd web-app/frontend && npm install && npm run dev
+```
+
+**Configure frontend**: Ensure `.env` in `web-app/frontend/` matches your backend URL:
+```
+VITE_API_BASE=http://localhost:3033
+```
 ## Previews
 Home Page
 ![image](https://github.com/user-attachments/assets/fb5f8b1b-9f6c-4259-a6fd-5f55178f1573)
@@ -77,6 +127,18 @@ Below is an overview of the **Local Cloud** system architecture:
 - **Backend**:  
   - Go (Golang) for the Web Server, Message Queue and Downloader Server.  
   - TCP/IP for inter-service communication.  
+- **Frontend**:  
+  - React + Vite + Tailwind CSS for the user interface.
+- **Database**:  
+  - MySQL for metadata storage.  
+- **Containerization**:  
+  - Docker and Docker Compose for development and deployment.  
+- **Video Processing**:  
+  - `yt-dlp` for video downloading.  
+  - `ffmpeg` for MP4 transcoding and thumbnail extraction.
+
+## **Technologies Used (Previous Section Content)**
+
 - **Frontend**:  
   - React (Vite) and Tailwind for building the user interface.  
 - **Database**:  
